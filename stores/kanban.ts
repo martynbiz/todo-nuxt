@@ -45,8 +45,8 @@ export const useKanbanStore = defineStore('kanban', {
   },
 
   actions: {
-    async init() {
-      const data = await $fetch<{ boards: Board[], tags: Tag[] }>('/api/state')
+    async init(headers?: Record<string, string>) {
+      const data = await $fetch<{ boards: Board[], tags: Tag[] }>('/api/state', { headers })
       this.boards = data.boards
       this.tags = data.tags
     },

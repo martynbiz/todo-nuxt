@@ -1,40 +1,39 @@
 import { getDb } from '../db'
+import { up as up0001 } from '../migrations/0001_init'
+import { up as up0002 } from '../migrations/0002_user_scoping'
+import { up as up0003 } from '../migrations/0003_user_name'
+import { up as up0004 } from '../migrations/0004_user_theme'
+
+const migrations = [
+  { name: '0001_init',          up: up0001 },
+  { name: '0002_user_scoping',  up: up0002 },
+  { name: '0003_user_name',     up: up0003 },
+  { name: '0004_user_theme',    up: up0004 },
+]
 
 export default defineNitroPlugin(async () => {
   if (!process.env.DATABASE_URL) return
 
   const sql = getDb()
 
+  // Tracking table — created once, never modified by migrations
   await sql`
-    CREATE TABLE IF NOT EXISTS boards (
-      id TEXT PRIMARY KEY,
-      title TEXT NOT NULL,
-      position INTEGER NOT NULL DEFAULT 0
-    )
-  `
-  await sql`
-    CREATE TABLE IF NOT EXISTS items (
-      id TEXT PRIMARY KEY,
-      board_id TEXT NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
-      title TEXT NOT NULL,
-      description TEXT NOT NULL DEFAULT '',
-      position INTEGER NOT NULL DEFAULT 0
-    )
-  `
-  await sql`
-    CREATE TABLE IF NOT EXISTS tags (
-      id TEXT PRIMARY KEY,
-      label TEXT NOT NULL,
-      color TEXT NOT NULL
-    )
-  `
-  await sql`
-    CREATE TABLE IF NOT EXISTS item_tags (
-      item_id TEXT NOT NULL REFERENCES items(id) ON DELETE CASCADE,
-      tag_id TEXT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
-      PRIMARY KEY (item_id, tag_id)
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      name       TEXT PRIMARY KEY,
+      applied_at TIMESTAMPTZ DEFAULT NOW()
     )
   `
 
-  console.log('[db] migrations complete')
+  const applied = await sql`SELECT name FROM schema_migrations`
+  const appliedNames = new Set(applied.map((r) => (r as { name: string }).name))
+
+  for (const migration of migrations) {
+    if (appliedNames.has(migration.name)) continue
+    console.log(`[db] applying migration: ${migration.name}`)
+    await migration.up(sql)
+    await sql`INSERT INTO schema_migrations (name) VALUES (${migration.name})`
+    console.log(`[db] migration applied:  ${migration.name}`)
+  }
+
+  console.log('[db] all migrations up to date')
 })

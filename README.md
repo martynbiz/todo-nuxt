@@ -2,43 +2,52 @@
 
 A kanban board app with drag-and-drop, tagging, and WYSIWYG item descriptions. Built with Nuxt 3, Pinia, Tiptap, and PostgreSQL.
 
+---
+
 ## Production (Docker)
 
-Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+Requires [Docker](https://www.docker.com/products/docker-desktop/) and [Git](https://git-scm.com/).
 
-### 1. Configure environment
+### First deployment
 
-Copy the example env file and edit it:
+**1. Clone the repository**
+
+```bash
+git clone <your-repo-url>
+cd todo-nuxt
+```
+
+**2. Create the environment file**
 
 ```bash
 cp .env.example .env
 ```
 
-The `.env` file is read automatically by Docker Compose. Available variables:
+Edit `.env` with your desired credentials:
+
+```env
+APP_PORT=3000
+POSTGRES_USER=kanban
+POSTGRES_PASSWORD=changeme
+POSTGRES_DB=kanban
+```
 
 | Variable | Default | Description |
 |---|---|---|
 | `APP_PORT` | `3000` | Host port the app is exposed on |
 | `POSTGRES_USER` | `kanban` | PostgreSQL username |
-| `POSTGRES_PASSWORD` | `kanban` | PostgreSQL password |
+| `POSTGRES_PASSWORD` | `kanban` | PostgreSQL password (change this) |
 | `POSTGRES_DB` | `kanban` | PostgreSQL database name |
 
-Example — run on port 8080 with custom credentials:
+> The database schema is created automatically on first start — no manual migration needed.
 
-```env
-APP_PORT=8080
-POSTGRES_USER=myuser
-POSTGRES_PASSWORD=s3cr3t
-POSTGRES_DB=mydb
-```
-
-### 2. Start
+**3. Build and start**
 
 ```bash
 docker compose up --build -d
 ```
 
-App runs at **http://localhost:${APP_PORT}**. PostgreSQL data is persisted in a named Docker volume.
+App runs at **http://localhost:${APP_PORT}**. PostgreSQL data is persisted in a named Docker volume and survives restarts.
 
 To stop:
 
@@ -48,12 +57,25 @@ docker compose down
 
 ---
 
+### Updating from Git
+
+Pull the latest code and rebuild the app image. The database schema is updated automatically on start.
+
+```bash
+git pull
+docker compose up --build -d
+```
+
+> `docker compose down` is not required before rebuilding — `up --build` replaces the running app container in place while leaving the postgres container and its data volume untouched.
+
+---
+
 ## Dev Environment
 
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) v22+
-- [PostgreSQL](https://www.postgresql.org/) running locally (or via Docker)
+- [Docker](https://www.docker.com/products/docker-desktop/) (for running PostgreSQL)
 
 ### 1. Install dependencies
 
@@ -61,21 +83,13 @@ docker compose down
 npm install
 ```
 
-### 2. Start a local PostgreSQL instance
-
-If you have Docker available, the quickest way:
+### 2. Start PostgreSQL via Docker Compose
 
 ```bash
-docker run -d \
-  --name kanban-postgres \
-  -e POSTGRES_USER=kanban \
-  -e POSTGRES_PASSWORD=kanban \
-  -e POSTGRES_DB=kanban \
-  -p 5432:5432 \
-  postgres:16-alpine
+docker compose up postgres -d
 ```
 
-Or use an existing local PostgreSQL install and create the database manually:
+Or use an existing local PostgreSQL install:
 
 ```sql
 CREATE USER kanban WITH PASSWORD 'kanban';
@@ -84,15 +98,13 @@ CREATE DATABASE kanban OWNER kanban;
 
 ### 3. Configure environment
 
-```bash
-cp .env.example .env
-```
-
-Set `DATABASE_URL` in `.env` to point at your local Postgres:
+A `.env` file is included with defaults for local development:
 
 ```env
 DATABASE_URL=postgresql://kanban:kanban@localhost:5432/kanban
 ```
+
+Edit it if you changed the credentials above.
 
 ### 4. Start the dev server
 
@@ -101,6 +113,44 @@ npm run dev
 ```
 
 App runs at **http://localhost:3000**. The database schema is created automatically on first run.
+
+---
+
+## Database Migrations
+
+Schema changes are managed with numbered migration files in `server/migrations/`. On every server start, the migration runner checks a `schema_migrations` table and applies any files that haven't run yet — in order, exactly once.
+
+### Adding a migration
+
+1. Create a new file following the naming convention:
+
+```
+server/migrations/0005_your_description.ts
+```
+
+```ts
+import type { getDb } from '../db'
+type Sql = ReturnType<typeof getDb>
+
+export async function up(sql: Sql) {
+  await sql`ALTER TABLE example ADD COLUMN new_col TEXT NOT NULL DEFAULT ''`
+}
+```
+
+2. Register it in `server/plugins/migrate.ts`:
+
+```ts
+import { up as up0005 } from '../migrations/0005_your_description'
+
+const migrations = [
+  ...
+  { name: '0005_your_description', up: up0005 },
+]
+```
+
+3. Restart the server (`npm run dev` or `docker compose up --build -d`). The migration runs automatically and is recorded in `schema_migrations`.
+
+> Write migrations to be additive where possible (add columns/tables rather than drop or rename) to keep them safe to apply against live data.
 
 ---
 

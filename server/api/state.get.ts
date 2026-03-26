@@ -1,13 +1,24 @@
 import { getDb } from '../db'
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  const userId = event.context.user.id
   const sql = getDb()
 
   const [boards, items, tags, itemTags] = await Promise.all([
-    sql`SELECT * FROM boards ORDER BY position`,
-    sql`SELECT * FROM items ORDER BY position`,
-    sql`SELECT * FROM tags`,
-    sql`SELECT * FROM item_tags`,
+    sql`SELECT * FROM boards WHERE user_id = ${userId} ORDER BY position`,
+    sql`
+      SELECT i.* FROM items i
+      JOIN boards b ON i.board_id = b.id
+      WHERE b.user_id = ${userId}
+      ORDER BY i.position
+    `,
+    sql`SELECT * FROM tags WHERE user_id = ${userId}`,
+    sql`
+      SELECT it.* FROM item_tags it
+      JOIN items i ON it.item_id = i.id
+      JOIN boards b ON i.board_id = b.id
+      WHERE b.user_id = ${userId}
+    `,
   ])
 
   return {

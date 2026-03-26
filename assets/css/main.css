@@ -13,6 +13,20 @@
   --accent-glow: rgba(99, 102, 241, 0.25);
 }
 
+[data-theme="light"] {
+  --bg: #f0f2f5;
+  --header-bg: #ffffff;
+  --board-bg: #e2e5ea;
+  --card-bg: #ffffff;
+  --border: #d1d5db;
+  --hover-bg: #eaecef;
+  --input-bg: #ffffff;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --accent: #6366f1;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;

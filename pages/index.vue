@@ -5,6 +5,7 @@
       <h1 class="app-title">Kanban Board</h1>
       <div class="header-actions">
         <button class="btn-add-board" @click="showAddBoard = !showAddBoard">+ Add Board</button>
+        <UserMenu />
       </div>
     </header>
 
@@ -145,6 +146,13 @@ function onBoardDrop(toIndex: number) {}
   font-weight: 800;
   letter-spacing: -0.5px;
   color: var(--text);
+}
+
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .btn-add-board {
