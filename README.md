@@ -41,6 +41,21 @@ POSTGRES_DB=kanban
 
 > The database schema is created automatically on first start — no manual migration needed.
 
+**3a. Secure the environment file**
+
+Restrict `.env` so only the owner can read it — it contains your database password:
+
+```bash
+chmod 600 .env
+```
+
+`600` means read/write for the file owner only. Docker Compose reads it as the user who runs the command, so this is sufficient. You can verify with:
+
+```bash
+ls -la .env
+# -rw------- 1 you you ... .env
+```
+
 **3. Build and start**
 
 ```bash
