@@ -5,6 +5,10 @@ services:
       - "${APP_PORT:-3000}:3000"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-kanban}:${POSTGRES_PASSWORD:-kanban}@postgres:5432/${POSTGRES_DB:-kanban}
+      NUXT_SESSION_PASSWORD: ${NUXT_SESSION_PASSWORD}
+      NUXT_OAUTH_MICROSOFT_CLIENT_ID: ${NUXT_OAUTH_MICROSOFT_CLIENT_ID}
+      NUXT_OAUTH_MICROSOFT_CLIENT_SECRET: ${NUXT_OAUTH_MICROSOFT_CLIENT_SECRET}
+      NUXT_OAUTH_MICROSOFT_TENANT: ${NUXT_OAUTH_MICROSOFT_TENANT}
     depends_on:
       postgres:
         condition: service_healthy
