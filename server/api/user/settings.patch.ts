@@ -15,5 +15,8 @@ export default defineEventHandler(async (event) => {
     UPDATE users SET theme = ${theme} WHERE id = ${user.id} RETURNING theme
   `
 
+  const session = await getUserSession(event)
+  await setUserSession(event, { user: { ...session.user, theme: updated.theme } })
+
   return { theme: updated.theme }
 })

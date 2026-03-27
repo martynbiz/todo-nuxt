@@ -1,5 +1,3 @@
-import { getSessionUser } from '../utils/auth'
-
 export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname
 
@@ -8,9 +6,9 @@ export default defineEventHandler(async (event) => {
   // Non-API routes — skip check
   if (!path.startsWith('/api/')) return
 
-  const user = await getSessionUser(event)
-  if (!user) {
+  const session = await getUserSession(event)
+  if (!session?.user) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
-  event.context.user = user
+  event.context.user = session.user
 })

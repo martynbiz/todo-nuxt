@@ -14,31 +14,17 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async login(email: string, password: string) {
-      this.user = await $fetch('/api/auth/login', {
-        method: 'POST',
-        body: { email, password },
-      })
-    },
-
-    async register(name: string, email: string, password: string) {
-      this.user = await $fetch('/api/auth/register', {
-        method: 'POST',
-        body: { name, email, password },
-      })
-    },
-
     async updateSettings(data: { theme?: string }) {
       if (this.user && data.theme !== undefined) this.user.theme = data.theme
       await $fetch('/api/user/settings', { method: 'PATCH', body: data })
     },
 
-    async updateProfile(data: { name?: string; email?: string }) {
+    async updateProfile(data: { name?: string }) {
       const updated = await $fetch<{ id: string; name: string; email: string }>('/api/user/profile', {
         method: 'PATCH',
         body: data,
       })
-      this.user = updated
+      if (this.user) this.user.name = updated.name
     },
 
     async logout() {
