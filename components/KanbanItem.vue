@@ -12,12 +12,17 @@
       <button class="item-delete" @click.stop="confirmRemoveItem" title="Delete item">×</button>
     </div>
 
-    <div class="item-tags" v-if="item.tags.length > 0">
-      <TagBadge
-        v-for="tagId in item.tags"
-        :key="tagId"
-        :tag="store.tags.find(t => t.id === tagId)!"
-      />
+    <div class="item-footer" v-if="item.tags.length > 0 || hasDescription">
+      <div class="item-tags" v-if="item.tags.length > 0">
+        <TagBadge
+          v-for="tagId in item.tags"
+          :key="tagId"
+          :tag="store.tags.find(t => t.id === tagId)!"
+        />
+      </div>
+      <svg v-if="hasDescription" class="desc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Has description">
+        <line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/>
+      </svg>
     </div>
   </div>
 </template>
@@ -35,6 +40,10 @@ async function confirmRemoveItem() {
   const ok = await confirm({ message: `Delete "${props.item.title}"?` })
   if (ok) store.removeItem(props.boardId, props.item.id)
 }
+
+const hasDescription = computed(() =>
+  !!props.item.description?.replace(/<[^>]*>/g, '').trim()
+)
 
 const isDragging = ref(false)
 let justDragged = false
@@ -106,10 +115,26 @@ function onDragEnd() {
 .kanban-item:hover .item-delete { opacity: 0.6; }
 .item-delete:hover { opacity: 1 !important; color: #ef4444; }
 
+.item-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  gap: 6px;
+}
+
 .item-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  margin-top: 8px;
+  flex: 1;
+}
+
+.desc-icon {
+  width: 12px;
+  height: 12px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  opacity: 0.6;
 }
 </style>

@@ -162,7 +162,8 @@ function save() {
   const t = title.value.trim()
   if (!t) return
   const { boardId, itemId } = modal.state.value!
-  const description = editor.value?.getHTML() ?? ''
+  const raw = editor.value?.getHTML() ?? ''
+  const description = raw.replace(/<[^>]*>/g, '').trim() ? raw : ''
 
   if (itemId) {
     store.updateItem(boardId, itemId, { title: t, description, tags: selectedTags.value })
