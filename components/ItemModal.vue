@@ -23,6 +23,7 @@
             class="flex-1 bg-transparent border-none text-[17px] font-bold text-app-text outline-none placeholder:text-app-muted placeholder:font-normal"
             placeholder="Item title..."
             @keydown.esc="close"
+            @keydown.enter="save"
           />
           <button aria-label="Close" class="modal-close bg-transparent border-none text-app-muted text-[22px] cursor-pointer leading-none px-1 hover:text-app-text" @click="close">×</button>
         </div>
@@ -389,6 +390,8 @@ function close() {
   padding-left: 20px;
   margin: 4px 0;
 }
+.prose-editor ul { list-style-type: disc; }
+.prose-editor ol { list-style-type: decimal; }
 .prose-editor li { margin: 2px 0; }
 .prose-editor p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
