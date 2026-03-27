@@ -3,12 +3,16 @@ import { up as up0001 } from '../migrations/0001_init'
 import { up as up0002 } from '../migrations/0002_user_scoping'
 import { up as up0003 } from '../migrations/0003_user_name'
 import { up as up0004 } from '../migrations/0004_user_theme'
+import { up as up0005 } from '../migrations/0005_comments'
+import { up as up0006 } from '../migrations/0006_fix_comments_userid'
 
 const migrations = [
-  { name: '0001_init',         up: up0001 },
-  { name: '0002_user_scoping', up: up0002 },
-  { name: '0003_user_name',    up: up0003 },
-  { name: '0004_user_theme',   up: up0004 },
+  { name: '0001_init',                  up: up0001 },
+  { name: '0002_user_scoping',          up: up0002 },
+  { name: '0003_user_name',             up: up0003 },
+  { name: '0004_user_theme',            up: up0004 },
+  { name: '0005_comments',             up: up0005 },
+  { name: '0006_fix_comments_userid',  up: up0006 },
 ]
 
 export default defineNitroPlugin(async () => {

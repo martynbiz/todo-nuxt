@@ -11,8 +11,11 @@ const pending = ref<{
   resolve: (value: boolean) => void
 } | null>(null)
 
+let triggerEl: HTMLElement | null = null
+
 export function useConfirm() {
   function confirm(options: ConfirmOptions): Promise<boolean> {
+    triggerEl = document.activeElement as HTMLElement
     return new Promise((resolve) => {
       pending.value = {
         message: options.message,
@@ -25,6 +28,8 @@ export function useConfirm() {
   function respond(value: boolean) {
     pending.value?.resolve(value)
     pending.value = null
+    triggerEl?.focus()
+    triggerEl = null
   }
 
   return { confirm, respond, pending }

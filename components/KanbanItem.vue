@@ -1,19 +1,24 @@
 <template>
   <div
-    class="kanban-item bg-app-card border border-app-border rounded-xl py-3 px-3 cursor-pointer transition-all duration-150 relative shadow-sm hover:shadow-md hover:border-app-accent/40 hover:-translate-y-px"
+    class="kanban-item bg-app-card border border-app-border rounded-xl py-3 px-3 cursor-pointer transition-all duration-150 relative shadow-sm hover:shadow-md hover:border-app-accent/40 hover:-translate-y-px focus:outline-2 focus:outline-black"
     :class="{ 'opacity-40 cursor-grabbing': isDragging }"
+    role="button"
+    :aria-label="item.title"
+    tabindex="0"
     draggable="true"
     @dragstart="onDragStart"
     @dragend="onDragEnd"
     @click="onCardClick"
+    @keydown.self.enter.prevent="onCardClick"
+    @keydown.self.space.prevent="onCardClick"
   >
     <!-- Title row -->
     <div class="flex items-start gap-2 mb-[8px]">
       <span class="flex-1 text-[15px] font-medium leading-snug break-words text-app-text">{{ item.title }}</span>
       <button
         class="item-delete bg-transparent border-none text-app-muted text-base cursor-pointer px-[2px] leading-none opacity-0 transition-opacity duration-100 shrink-0 mt-[1px]"
+        :aria-label="`Delete ${item.title}`"
         @click.stop="confirmRemoveItem"
-        title="Delete item"
       >×</button>
     </div>
 
@@ -77,5 +82,5 @@ function onDragEnd() {
 
 <style scoped>
 .kanban-item:hover .item-delete { opacity: 0.6; }
-.item-delete:hover { opacity: 1 !important; color: #ef4444; }
+.item-delete:hover, .item-delete:focus { opacity: 1 !important; color: #ef4444; }
 </style>

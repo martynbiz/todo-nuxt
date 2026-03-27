@@ -2,6 +2,8 @@
   <div
     class="kanban-board bg-app-board border border-app-border rounded-xl w-[288px] shrink-0 flex flex-col transition-[border-color,box-shadow] duration-150 min-h-[120px] overflow-hidden"
     :class="{ 'border-app-accent shadow-[0_0_0_2px_var(--accent-glow)]': isDragOver }"
+    role="region"
+    :aria-label="board.title"
     @dragover.prevent="onDragOver"
     @dragleave="onDragLeave"
     @drop="onDrop"
@@ -35,8 +37,8 @@
       </div>
       <button
         class="board-delete bg-transparent border-none text-app-muted text-lg cursor-pointer leading-none px-1 opacity-0 transition-opacity duration-100 shrink-0 ml-1"
+        :aria-label="`Delete board ${board.title}`"
         @click="confirmRemoveBoard"
-        title="Delete board"
       >×</button>
     </div>
 
@@ -69,6 +71,7 @@
     <div class="px-3 pb-3 pt-1">
       <button
         class="btn-add-item w-full flex items-center justify-center gap-[6px] bg-transparent border border-dashed border-app-border rounded-lg text-app-muted text-[12px] font-medium py-[9px] cursor-pointer transition-[border-color,color,background] duration-150 hover:border-app-accent hover:text-app-accent hover:bg-app-hover"
+        :aria-label="`Add item to ${board.title}`"
         @click="modal.openNew(board.id)"
       >
         <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -164,5 +167,5 @@ function onBoardDragEnd() {}
 
 <style scoped>
 .kanban-board:hover .board-delete { opacity: 0.5; }
-.board-delete:hover { opacity: 1 !important; color: #ef4444; }
+.board-delete:hover, .board-delete:focus { opacity: 1 !important; color: #ef4444; outline: 2px solid black; }
 </style>
