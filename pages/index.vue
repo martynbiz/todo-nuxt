@@ -1,46 +1,54 @@
 <template>
-  <div class="app">
+  <div class="min-h-screen flex flex-col bg-app-bg">
     <!-- Header -->
-    <header class="app-header">
-      <h1 class="app-title">Kanban Board</h1>
-      <div class="header-actions">
-        <button class="btn-add-board" @click="showAddBoard = !showAddBoard">+ Add Board</button>
+    <header class="flex items-center justify-between py-[14px] px-6 border-b border-app-border bg-app-header sticky top-0 z-10">
+      <h1 class="text-[17px] font-extrabold tracking-tight text-app-text">Kanban</h1>
+      <div class="flex items-center gap-3">
+        <button
+          class="btn-add-board inline-flex items-center gap-[6px] bg-app-accent text-white border-none rounded-lg py-[7px] px-[14px] text-[13px] font-semibold cursor-pointer"
+          @click="showAddBoard = !showAddBoard"
+        >
+          <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Board
+        </button>
         <UserMenu />
       </div>
     </header>
 
     <!-- Add board form -->
-    <div v-if="showAddBoard" class="add-board-bar">
+    <div v-if="showAddBoard" class="flex items-center gap-2 py-3 px-6 bg-app-board border-b border-app-border">
       <input
         ref="boardInput"
         v-model="newBoardTitle"
-        class="add-board-input"
+        class="bg-app-input border border-app-accent rounded-lg py-2 px-3 text-sm text-app-text outline-none w-[240px]"
         placeholder="Board name..."
         @keydown.enter="submitBoard"
         @keydown.esc="showAddBoard = false"
       />
-      <button class="btn-confirm" @click="submitBoard">Create</button>
-      <button class="btn-cancel" @click="showAddBoard = false">Cancel</button>
+      <button class="btn-confirm bg-app-accent text-white border-none rounded-lg py-2 px-4 text-[13px] font-semibold cursor-pointer" @click="submitBoard">Create</button>
+      <button class="border border-app-border rounded-lg py-2 px-3 text-[13px] cursor-pointer text-app-muted bg-transparent hover:border-app-muted hover:text-app-text" @click="showAddBoard = false">Cancel</button>
     </div>
 
     <!-- Tag filter bar -->
-    <div class="tag-filter-bar" v-if="usedTags.length > 0">
-      <span class="filter-label">Filter by tag:</span>
-      <div class="tag-filters">
-        <TagBadge
+    <div class="flex items-center gap-3 py-[10px] px-6 border-b border-app-border bg-app-header flex-wrap" v-if="usedTags.length > 0">
+      <span class="text-xs font-semibold text-app-muted whitespace-nowrap">Filter:</span>
+      <div class="flex flex-wrap gap-2">
+        <span
           v-for="tag in usedTags"
           :key="tag.id"
-          :tag="tag"
-          class="tag-filter-item"
-          :class="{ 'tag-inactive': store.filterTags.length > 0 && !store.filterTags.includes(tag.id) }"
+          class="inline-flex items-center gap-[4px] py-[5px] px-[12px] rounded-full text-[12px] font-semibold tracking-[0.02em] whitespace-nowrap text-white cursor-pointer select-none transition duration-150 tag-filter-item"
+          :class="{ 'opacity-[0.35] grayscale-[0.4]': store.filterTags.length > 0 && !store.filterTags.includes(tag.id) }"
+          :style="{ backgroundColor: tag.color }"
           @click="store.toggleFilterTag(tag.id)"
-        />
+        >{{ tag.label }}</span>
       </div>
     </div>
 
     <!-- Boards -->
     <main
-      class="boards-container"
+      class="flex gap-4 p-6 overflow-x-auto flex-1 items-start"
       @dragover.prevent="onBoardAreaDragOver"
       @drop="onBoardAreaDrop"
     >
@@ -54,8 +62,12 @@
         @board-drop="onBoardDrop"
       />
 
-      <div v-if="store.boards.length === 0" class="empty-state">
-        <p>No boards yet. Create one to get started!</p>
+      <div v-if="store.boards.length === 0" class="flex flex-col items-center justify-center gap-3 text-app-muted text-sm p-16 w-full">
+        <svg class="w-10 h-10 opacity-30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="7" height="18" rx="2"/><rect x="14" y="3" width="7" height="11" rx="2"/>
+        </svg>
+        <p class="text-[15px] font-semibold text-app-text opacity-40">No boards yet</p>
+        <p class="text-[13px] opacity-60">Create your first board to get started</p>
       </div>
     </main>
   </div>
@@ -106,7 +118,6 @@ function onBoardAreaDrop(e: DragEvent) {
   try {
     const data = JSON.parse(raw)
     if (data.boardDrag) {
-      // Find which board column we dropped on
       const target = (e.target as HTMLElement).closest('.kanban-board')
       if (!target) return
       const boards = document.querySelectorAll('.kanban-board')
@@ -119,138 +130,11 @@ function onBoardAreaDrop(e: DragEvent) {
   draggingBoardIndex.value = null
 }
 
-function onBoardDrop(toIndex: number) {}
+function onBoardDrop(_toIndex: number) {}
 </script>
 
 <style scoped>
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--header-bg);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.app-title {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--text);
-}
-
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.btn-add-board {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: filter 0.1s;
-}
 .btn-add-board:hover { filter: brightness(1.1); }
-
-.add-board-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: var(--board-bg);
-  border-bottom: 1px solid var(--border);
-}
-.add-board-input {
-  background: var(--input-bg);
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
-  width: 240px;
-}
-.btn-confirm {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
 .btn-confirm:hover { filter: brightness(1.1); }
-.btn-cancel {
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 13px;
-  cursor: pointer;
-  color: var(--text-muted);
-}
-.btn-cancel:hover { border-color: var(--text-muted); color: var(--text); }
-
-.tag-filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--header-bg);
-  flex-wrap: wrap;
-}
-.filter-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-.tag-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.tag-filter-item {
-  cursor: pointer;
-  user-select: none;
-  transition: filter 0.15s, opacity 0.15s;
-}
 .tag-filter-item:hover { filter: brightness(1.15); }
-.tag-inactive {
-  opacity: 0.35;
-  filter: grayscale(0.4);
-}
-
-.boards-container {
-  display: flex;
-  gap: 16px;
-  padding: 24px;
-  overflow-x: auto;
-  flex: 1;
-  align-items: flex-start;
-}
-
-.empty-state {
-  color: var(--text-muted);
-  font-size: 14px;
-  padding: 40px;
-}
 </style>

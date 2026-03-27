@@ -1,38 +1,40 @@
 <template>
   <Teleport to="body">
-    <div v-if="modal.state.value" class="modal-overlay" @click.self="close">
-      <div class="modal">
-        <div class="modal-header">
+    <div v-if="modal.state.value" class="fixed inset-0 bg-black/[0.65] flex items-center justify-center z-[200]" @click.self="close">
+      <div class="bg-app-card border border-app-border rounded-[14px] w-[560px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-64px)] flex flex-col shadow-[0_24px_64px_rgba(0,0,0,0.5)]">
+
+        <!-- Header -->
+        <div class="flex items-center gap-2 px-[18px] pt-[18px] pb-3 border-b border-app-border">
           <input
             v-model="title"
-            class="modal-title-input"
+            class="flex-1 bg-transparent border-none text-[17px] font-bold text-app-text outline-none placeholder:text-app-muted placeholder:font-normal"
             placeholder="Item title..."
             @keydown.esc="close"
           />
-          <button class="modal-close" @click="close">×</button>
+          <button class="modal-close bg-transparent border-none text-app-muted text-[22px] cursor-pointer leading-none px-1 hover:text-app-text" @click="close">×</button>
         </div>
 
         <!-- WYSIWYG toolbar -->
-        <div class="editor-toolbar" v-if="editor">
+        <div class="flex gap-[2px] px-3 py-[6px] border-b border-app-border flex-wrap" v-if="editor">
           <button
             v-for="btn in toolbarButtons"
             :key="btn.label"
-            class="toolbar-btn"
-            :class="{ active: btn.active() }"
+            class="toolbar-btn bg-transparent border border-transparent rounded-[5px] text-app-muted text-xs font-bold cursor-pointer py-[3px] px-2 min-w-[28px] text-center transition-[background,color] duration-100 hover:bg-app-hover hover:text-app-text"
+            :class="{ 'bg-app-hover text-app-accent border-app-border': btn.active() }"
             @click="btn.action()"
             :title="btn.label"
           >{{ btn.icon }}</button>
         </div>
 
         <!-- Editor -->
-        <div class="editor-wrapper">
+        <div class="flex-1 overflow-y-auto px-[18px] py-[14px] min-h-[140px] max-h-[280px]">
           <EditorContent :editor="editor" class="editor-content" />
         </div>
 
         <!-- Tags -->
-        <div class="modal-tags-section">
-          <div class="modal-tags-label">Tags</div>
-          <div class="modal-tags-row">
+        <div class="px-[18px] pt-[10px] pb-[14px] border-t border-app-border">
+          <div class="text-[11px] font-semibold text-app-muted uppercase tracking-[0.06em] mb-2">Tags</div>
+          <div class="flex flex-wrap items-center gap-[6px]">
             <TagBadge
               v-for="tagId in selectedTags"
               :key="tagId"
@@ -40,28 +42,28 @@
               removable
               @remove="toggleTag(tagId)"
             />
-            <div class="tag-picker-wrap">
-              <button class="btn-add-tag" @click.stop="showTagPicker = !showTagPicker">+ tag</button>
-              <div v-if="showTagPicker" class="tag-dropdown">
-                <div class="tag-dropdown-inner">
+            <div class="relative">
+              <button class="btn-add-tag bg-transparent border border-dashed border-app-border rounded-full text-[11px] text-app-muted py-[2px] px-2 cursor-pointer transition-[border-color,color] duration-100 hover:border-app-accent hover:text-app-accent" @click.stop="showTagPicker = !showTagPicker">+ tag</button>
+              <div v-if="showTagPicker" class="absolute top-[calc(100%+4px)] left-0 z-[300] w-[200px]">
+                <div class="bg-app-card border border-app-border rounded-lg p-[6px] shadow-[0_8px_24px_rgba(0,0,0,0.3)] flex flex-col gap-[3px]">
                   <div
                     v-for="tag in usedTags"
                     :key="tag.id"
-                    class="tag-option"
-                    :class="{ active: selectedTags.includes(tag.id) }"
+                    class="flex items-center justify-between px-[6px] py-1 rounded cursor-pointer hover:bg-app-hover"
+                    :class="{ 'bg-app-hover': selectedTags.includes(tag.id) }"
                     @click="toggleTag(tag.id)"
                   >
                     <TagBadge :tag="tag" />
-                    <span class="tag-check" v-if="selectedTags.includes(tag.id)">✓</span>
+                    <span v-if="selectedTags.includes(tag.id)" class="text-app-accent font-bold text-[11px]">✓</span>
                   </div>
-                  <div class="tag-create" v-if="newTagLabel.trim()">
-                    <button class="btn-create-tag" @click="createAndAssign">Create "{{ newTagLabel }}"</button>
+                  <div v-if="newTagLabel.trim()">
+                    <button class="btn-create-tag bg-app-accent text-white border-none rounded text-[11px] cursor-pointer py-1 px-2 w-full text-left hover:brightness-110" @click="createAndAssign">Create "{{ newTagLabel }}"</button>
                   </div>
                   <input
                     ref="tagInput"
                     v-model="newTagLabel"
                     placeholder="New tag..."
-                    class="tag-input"
+                    class="w-full bg-app-input border border-app-border rounded text-xs text-app-text py-[5px] px-2 mt-1 outline-none focus:border-app-accent box-border"
                     @keydown.enter="createAndAssign"
                     @keydown.esc="showTagPicker = false"
                     @click.stop
@@ -72,12 +74,14 @@
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="close">Cancel</button>
-          <button class="btn-save" @click="save" :disabled="!title.trim()">
+        <!-- Footer -->
+        <div class="flex justify-end gap-2 px-[18px] py-3 border-t border-app-border">
+          <button class="btn-cancel bg-transparent border border-app-border rounded-lg py-[7px] px-[14px] text-[13px] cursor-pointer text-app-muted hover:border-app-muted hover:text-app-text" @click="close">Cancel</button>
+          <button class="btn-save bg-app-accent text-white border-none rounded-lg py-[7px] px-[18px] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" @click="save" :disabled="!title.trim()">
             {{ isNew ? 'Add Item' : 'Save' }}
           </button>
         </div>
+
       </div>
     </div>
   </Teleport>
@@ -180,205 +184,8 @@ function close() {
 </script>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
-}
-
-.modal {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  width: 560px;
-  max-width: calc(100vw - 32px);
-  max-height: calc(100vh - 64px);
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 18px 18px 12px;
-  border-bottom: 1px solid var(--border);
-}
-.modal-title-input {
-  flex: 1;
-  background: none;
-  border: none;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text);
-  outline: none;
-}
-.modal-title-input::placeholder { color: var(--text-muted); font-weight: 400; }
-.modal-close {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 22px;
-  cursor: pointer;
-  line-height: 1;
-  padding: 0 4px;
-}
-.modal-close:hover { color: var(--text); }
-
-/* Toolbar */
-.editor-toolbar {
-  display: flex;
-  gap: 2px;
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--border);
-  flex-wrap: wrap;
-}
-.toolbar-btn {
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 5px;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  padding: 3px 8px;
-  min-width: 28px;
-  text-align: center;
-  transition: background 0.1s, color 0.1s;
-}
-.toolbar-btn:hover { background: var(--hover-bg); color: var(--text); }
-.toolbar-btn.active { background: var(--hover-bg); color: var(--accent); border-color: var(--border); }
-
-/* Editor */
-.editor-wrapper {
-  flex: 1;
-  overflow-y: auto;
-  padding: 14px 18px;
-  min-height: 140px;
-  max-height: 280px;
-}
-
-/* Tags section */
-.modal-tags-section {
-  padding: 10px 18px 14px;
-  border-top: 1px solid var(--border);
-}
-.modal-tags-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 8px;
-}
-.modal-tags-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
-.tag-picker-wrap {
-  position: relative;
-}
-.btn-add-tag {
-  background: none;
-  border: 1px dashed var(--border);
-  border-radius: 999px;
-  font-size: 11px;
-  color: var(--text-muted);
-  padding: 2px 8px;
-  cursor: pointer;
-  transition: border-color 0.1s, color 0.1s;
-}
-.btn-add-tag:hover { border-color: var(--accent); color: var(--accent); }
-.tag-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  z-index: 300;
-  width: 200px;
-}
-.tag-dropdown-inner {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.tag-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 6px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.tag-option:hover { background: var(--hover-bg); }
-.tag-option.active { background: var(--hover-bg); }
-.tag-check { color: var(--accent); font-weight: bold; font-size: 11px; }
-.tag-input {
-  width: 100%;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 5px 8px;
-  font-size: 12px;
-  color: var(--text);
-  margin-top: 4px;
-  box-sizing: border-box;
-}
-.tag-input:focus { outline: none; border-color: var(--accent); }
-.btn-create-tag {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 11px;
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
-}
+.btn-save:hover:not(:disabled) { filter: brightness(1.1); }
 .btn-create-tag:hover { filter: brightness(1.1); }
-
-/* Footer */
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 18px;
-  border-top: 1px solid var(--border);
-}
-.btn-cancel {
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 7px 14px;
-  font-size: 13px;
-  cursor: pointer;
-  color: var(--text-muted);
-}
-.btn-cancel:hover { border-color: var(--text-muted); color: var(--text); }
-.btn-save {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 7px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.btn-save:hover { filter: brightness(1.1); }
-.btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>
 
 <style>

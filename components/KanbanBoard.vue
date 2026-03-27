@@ -1,56 +1,81 @@
 <template>
   <div
-    class="kanban-board"
-    :class="{ 'drag-over': isDragOver }"
+    class="kanban-board bg-app-board border border-app-border rounded-xl w-[288px] shrink-0 flex flex-col transition-[border-color,box-shadow] duration-150 min-h-[120px] overflow-hidden"
+    :class="{ 'border-app-accent shadow-[0_0_0_2px_var(--accent-glow)]': isDragOver }"
     @dragover.prevent="onDragOver"
     @dragleave="onDragLeave"
     @drop="onDrop"
   >
     <!-- Board header -->
     <div
-      class="board-header"
+      class="flex items-center justify-between px-4 pt-3 pb-2 cursor-grab"
       draggable="true"
       @dragstart="onBoardDragStart"
       @dragend="onBoardDragEnd"
     >
-      <span v-if="!editingTitle" class="board-title" @dblclick="startEditTitle">
-        {{ board.title }}
-        <span class="item-count">{{ visibleItems.length }}</span>
-      </span>
-      <input
-        v-else
-        ref="titleInput"
-        v-model="titleDraft"
-        class="board-title-input"
-        @blur="saveTitle"
-        @keydown.enter="saveTitle"
-        @keydown.esc="editingTitle = false"
-      />
-      <button class="board-delete" @click="confirmRemoveBoard" title="Delete board">×</button>
+      <div class="flex items-center gap-2 flex-1 min-w-0">
+        <span
+          v-if="!editingTitle"
+          class="board-title font-bold text-[13px] text-app-text select-none truncate"
+          @dblclick="startEditTitle"
+        >{{ board.title }}</span>
+        <input
+          v-else
+          ref="titleInput"
+          v-model="titleDraft"
+          class="flex-1 bg-app-input border border-app-accent rounded text-[13px] font-bold text-app-text outline-none py-[2px] px-[6px]"
+          @blur="saveTitle"
+          @keydown.enter="saveTitle"
+          @keydown.esc="editingTitle = false"
+        />
+        <span
+          class="shrink-0 text-[11px] font-bold px-[8px] py-[1px] rounded-full"
+          :style="{ backgroundColor: accentColor + '22', color: accentColor }"
+        >{{ visibleItems.length }}</span>
+      </div>
+      <button
+        class="board-delete bg-transparent border-none text-app-muted text-lg cursor-pointer leading-none px-1 opacity-0 transition-opacity duration-100 shrink-0 ml-1"
+        @click="confirmRemoveBoard"
+        title="Delete board"
+      >×</button>
     </div>
 
     <!-- Items list -->
-    <div class="board-items">
+    <div class="flex flex-col flex-1 px-3 pb-1">
       <div
         v-for="(item, index) in visibleItems"
         :key="item.id"
-        class="item-wrapper"
+        class="relative py-[3px]"
         @dragover.prevent="onItemDragOver(index, $event)"
       >
-        <div class="drop-indicator" :class="{ active: dropIndex === index }" />
+        <div
+          class="h-[2px] rounded-full mb-[2px] transition-opacity duration-100"
+          :style="{ backgroundColor: accentColor, opacity: dropIndex === index ? 1 : 0 }"
+        />
         <KanbanItem :item="item" :board-id="board.id" />
       </div>
       <div
-        class="item-wrapper"
+        class="relative py-[3px]"
         @dragover.prevent="onItemDragOver(visibleItems.length, $event)"
       >
-        <div class="drop-indicator" :class="{ active: dropIndex === visibleItems.length }" />
+        <div
+          class="h-[2px] rounded-full mb-[2px] transition-opacity duration-100"
+          :style="{ backgroundColor: accentColor, opacity: dropIndex === visibleItems.length ? 1 : 0 }"
+        />
       </div>
     </div>
 
     <!-- Add item -->
-    <div class="add-item-area">
-      <button class="btn-add-item" @click="modal.openNew(board.id)">+ Add item</button>
+    <div class="px-3 pb-3 pt-1">
+      <button
+        class="btn-add-item w-full flex items-center justify-center gap-[6px] bg-transparent border border-dashed border-app-border rounded-lg text-app-muted text-[12px] font-medium py-[9px] cursor-pointer transition-[border-color,color,background] duration-150 hover:border-app-accent hover:text-app-accent hover:bg-app-hover"
+        @click="modal.openNew(board.id)"
+      >
+        <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add item
+      </button>
     </div>
   </div>
 </template>
@@ -65,6 +90,9 @@ const emit = defineEmits<{
   boardDragStart: [index: number]
   boardDrop: [toIndex: number]
 }>()
+
+const COLUMN_ACCENTS = ['#f472b6', '#fb923c', '#34d399', '#60a5fa', '#a78bfa', '#f59e0b', '#ef4444']
+const accentColor = computed(() => COLUMN_ACCENTS[props.boardIndex % COLUMN_ACCENTS.length])
 
 const store = useKanbanStore()
 const visibleItems = computed(() => store.visibleItems(props.board.id))
@@ -118,7 +146,7 @@ function onDrop(e: DragEvent) {
   try {
     const data = JSON.parse(raw)
     if (data.boardDrag !== undefined) return // board reorder handled in parent
-    const { itemId, boardId: fromBoardId, index: fromIndex } = data
+    const { boardId: fromBoardId, index: fromIndex } = data
     const toIndex = dropIndex.value ?? visibleItems.value.length
     store.moveItem(fromBoardId, fromIndex, props.board.id, toIndex)
   } catch {}
@@ -135,113 +163,6 @@ function onBoardDragEnd() {}
 </script>
 
 <style scoped>
-.kanban-board {
-  background: var(--board-bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-  width: 280px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  min-height: 120px;
-}
-.kanban-board.drag-over {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-glow);
-}
-
-.board-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: grab;
-  padding: 2px 0;
-}
-.board-title {
-  font-weight: 700;
-  font-size: 14px;
-  flex: 1;
-  user-select: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.item-count {
-  background: var(--border);
-  color: var(--text-muted);
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 1px 7px;
-}
-.board-title-input {
-  flex: 1;
-  background: var(--input-bg);
-  border: 1px solid var(--accent);
-  border-radius: 6px;
-  padding: 3px 6px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-  outline: none;
-}
-
-.board-delete {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 18px;
-  cursor: pointer;
-  line-height: 1;
-  padding: 0 4px;
-  opacity: 0;
-  transition: opacity 0.1s;
-}
 .kanban-board:hover .board-delete { opacity: 0.5; }
 .board-delete:hover { opacity: 1 !important; color: #ef4444; }
-
-.board-items {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  flex: 1;
-}
-.item-wrapper {
-  position: relative;
-  padding: 3px 0;
-}
-.drop-indicator {
-  height: 2px;
-  border-radius: 1px;
-  background: var(--accent);
-  opacity: 0;
-  transition: opacity 0.1s;
-  margin-bottom: 2px;
-}
-.drop-indicator.active { opacity: 1; }
-
-.add-item-area {
-  margin-top: 4px;
-}
-.btn-add-item {
-  width: 100%;
-  background: none;
-  border: 1px dashed var(--border);
-  border-radius: 8px;
-  color: var(--text-muted);
-  font-size: 13px;
-  padding: 8px;
-  cursor: pointer;
-  transition: border-color 0.1s, color 0.1s, background 0.1s;
-  text-align: center;
-}
-.btn-add-item:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--hover-bg);
-}
-
 </style>

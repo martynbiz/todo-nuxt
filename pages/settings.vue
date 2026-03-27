@@ -1,39 +1,39 @@
 <template>
-  <div class="subpage">
-    <header class="subpage-header">
-      <NuxtLink to="/" class="back-link">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+  <div class="min-h-screen flex flex-col bg-app-bg">
+    <header class="flex items-center justify-between py-4 px-6 border-b border-app-border bg-app-header sticky top-0 z-10">
+      <NuxtLink to="/" class="back-link flex items-center gap-1 text-[13px] text-app-muted no-underline transition-colors duration-150 hover:text-app-text">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         Boards
       </NuxtLink>
-      <h1 class="subpage-title">Settings</h1>
+      <h1 class="text-base font-bold text-app-text">Settings</h1>
       <UserMenu />
     </header>
 
-    <main class="subpage-content">
+    <main class="flex flex-col items-center gap-5 py-8 px-6">
 
       <!-- Appearance -->
-      <section class="card">
-        <h2 class="card-title">Appearance</h2>
-        <div class="setting-row">
-          <div class="setting-label">
+      <section class="bg-app-card border border-app-border rounded-2xl p-7 w-full max-w-[480px]">
+        <h2 class="text-[15px] font-bold text-app-text mb-5">Appearance</h2>
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex flex-col gap-[3px] text-sm font-medium text-app-text">
             <span>Theme</span>
-            <span class="setting-hint">Choose your preferred colour scheme</span>
+            <span class="text-xs text-app-muted font-normal">Choose your preferred colour scheme</span>
           </div>
-          <div class="theme-toggle">
+          <div class="flex bg-app-bg rounded-lg p-[3px] gap-[2px]">
             <button
-              class="theme-btn"
-              :class="{ active: theme === 'dark' }"
+              class="theme-btn flex items-center gap-[6px] border-none rounded text-[13px] cursor-pointer transition-colors duration-150 py-[7px] px-[14px]"
+              :class="theme === 'dark' ? 'bg-app-card text-app-text font-semibold' : 'bg-transparent text-app-muted font-medium'"
               @click="apply('dark')"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
               Dark
             </button>
             <button
-              class="theme-btn"
-              :class="{ active: theme === 'light' }"
+              class="theme-btn flex items-center gap-[6px] border-none rounded text-[13px] cursor-pointer transition-colors duration-150 py-[7px] px-[14px]"
+              :class="theme === 'light' ? 'bg-app-card text-app-text font-semibold' : 'bg-transparent text-app-muted font-medium'"
               @click="apply('light')"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
               Light
             </button>
           </div>
@@ -41,45 +41,45 @@
       </section>
 
       <!-- Data -->
-      <section class="card">
-        <h2 class="card-title">Data</h2>
+      <section class="bg-app-card border border-app-border rounded-2xl p-7 w-full max-w-[480px]">
+        <h2 class="text-[15px] font-bold text-app-text mb-5">Data</h2>
 
         <!-- Export -->
-        <div class="setting-row">
-          <div class="setting-label">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex flex-col gap-[3px] text-sm font-medium text-app-text">
             <span>Export</span>
-            <span class="setting-hint">Download all boards, items and tags as JSON</span>
+            <span class="text-xs text-app-muted font-normal">Download all boards, items and tags as JSON</span>
           </div>
-          <button class="btn-secondary" :disabled="exporting" @click="exportData">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <button class="btn-secondary inline-flex items-center gap-[6px] bg-transparent border border-app-border rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:border-app-muted" :disabled="exporting" @click="exportData">
+            <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             {{ exporting ? 'Exporting…' : 'Export JSON' }}
           </button>
         </div>
 
-        <div class="setting-divider" />
+        <div class="h-px bg-app-border my-5" />
 
         <!-- Import -->
-        <div class="setting-row">
-          <div class="setting-label">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex flex-col gap-[3px] text-sm font-medium text-app-text">
             <span>Import</span>
-            <span class="setting-hint">Restore from a previously exported JSON file</span>
+            <span class="text-xs text-app-muted font-normal">Restore from a previously exported JSON file</span>
           </div>
-          <label class="btn-secondary btn-file">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <label class="btn-file inline-flex items-center gap-[6px] bg-transparent border border-app-border rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 relative overflow-hidden hover:border-app-muted">
+            <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Choose file
-            <input type="file" accept=".json,application/json" @change="onFileChange" />
+            <input type="file" accept=".json,application/json" class="absolute inset-0 opacity-0 cursor-pointer text-[0px]" @change="onFileChange" />
           </label>
         </div>
 
-        <div v-if="importFile" class="import-footer">
-          <span class="import-filename">{{ importFile.name }}</span>
-          <button class="btn-primary" :disabled="importing" @click="importData">
+        <div v-if="importFile" class="flex items-center gap-3 mt-4 flex-wrap">
+          <span class="flex-1 text-[13px] text-app-muted overflow-hidden text-ellipsis whitespace-nowrap">{{ importFile.name }}</span>
+          <button class="btn-primary bg-app-accent text-white border-none rounded-lg py-2 px-[18px] text-[13px] font-semibold cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed" :disabled="importing" @click="importData">
             {{ importing ? 'Importing…' : 'Import' }}
           </button>
         </div>
 
-        <p v-if="importError" class="msg msg--error">{{ importError }}</p>
-        <p v-if="importResult" class="msg msg--success">{{ importResult }}</p>
+        <p v-if="importError" class="text-[13px] text-red-500 mt-3">{{ importError }}</p>
+        <p v-if="importResult" class="text-[13px] text-emerald-500 mt-3">{{ importResult }}</p>
       </section>
 
     </main>
@@ -148,196 +148,6 @@ async function importData() {
 </script>
 
 <style scoped>
-.subpage {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-}
-
-.subpage-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--header-bg);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.back-link {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  color: var(--text-muted);
-  text-decoration: none;
-  transition: color 0.15s;
-}
-.back-link:hover { color: var(--text); }
-.back-link svg { width: 16px; height: 16px; }
-
-.subpage-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.subpage-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  padding: 32px 24px;
-}
-
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 28px;
-  width: 100%;
-  max-width: 480px;
-}
-
-.card-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 20px;
-}
-
-.setting-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.setting-label {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-}
-.setting-hint {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 400;
-}
-
-.theme-toggle {
-  display: flex;
-  background: var(--bg);
-  border-radius: 8px;
-  padding: 3px;
-  gap: 2px;
-}
-
-.theme-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  border-radius: 6px;
-  padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.theme-btn svg {
-  width: 14px;
-  height: 14px;
-}
-.theme-btn.active {
-  background: var(--card-bg);
-  color: var(--text);
-  font-weight: 600;
-}
-.theme-btn:not(.active):hover {
-  color: var(--text);
-}
-
-.setting-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 20px 0;
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: border-color 0.15s;
-}
-.btn-secondary:hover:not(:disabled) { border-color: var(--text-muted); }
-.btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-secondary svg { width: 14px; height: 14px; }
-
-.btn-file {
-  position: relative;
-  overflow: hidden;
-}
-.btn-file input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  font-size: 0;
-}
-
-.import-footer {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
-
-.import-filename {
-  flex: 1;
-  font-size: 13px;
-  color: var(--text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: filter 0.15s;
-}
 .btn-primary:hover:not(:disabled) { filter: brightness(1.1); }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.msg {
-  font-size: 13px;
-  margin-top: 12px;
-}
-.msg--error { color: #ef4444; }
-.msg--success { color: #10b981; }
+.theme-btn:not(.bg-app-card):hover { color: var(--text); }
 </style>

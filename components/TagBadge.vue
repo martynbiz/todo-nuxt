@@ -1,7 +1,7 @@
 <template>
-  <span class="tag-badge" :style="{ backgroundColor: tag.color + '22', borderColor: tag.color, color: tag.color }">
+  <span class="tag-badge inline-flex items-center gap-[3px] py-[2px] px-2 rounded-full text-[11px] font-semibold tracking-[0.02em] whitespace-nowrap leading-relaxed" :style="{ border: `1px solid ${tag.color}`, color: tag.color, backgroundColor: 'transparent' }">
     {{ tag.label }}
-    <button v-if="removable" class="tag-remove" @click.stop="$emit('remove', tag.id)" title="Remove tag">×</button>
+    <button v-if="removable" class="bg-transparent border-none cursor-pointer text-[13px] leading-none p-0 text-[inherit] opacity-70 ml-[1px] hover:opacity-100" @click.stop="$emit('remove', tag.id)" title="Remove tag">×</button>
   </span>
 </template>
 
@@ -11,32 +11,3 @@ import type { Tag } from '~/stores/kanban'
 defineProps<{ tag: Tag; removable?: boolean }>()
 defineEmits<{ remove: [id: string] }>()
 </script>
-
-<style scoped>
-.tag-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  line-height: 1.6;
-}
-
-.tag-remove {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 13px;
-  line-height: 1;
-  padding: 0;
-  color: inherit;
-  opacity: 0.7;
-  margin-left: 1px;
-}
-.tag-remove:hover { opacity: 1; }
-</style>

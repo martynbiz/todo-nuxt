@@ -1,26 +1,32 @@
 <template>
   <div
-    class="kanban-item"
-    :class="{ 'is-dragging': isDragging }"
+    class="kanban-item bg-app-card border border-app-border rounded-xl py-3 px-3 cursor-pointer transition-all duration-150 relative shadow-sm hover:shadow-md hover:border-app-accent/40 hover:-translate-y-px"
+    :class="{ 'opacity-40 cursor-grabbing': isDragging }"
     draggable="true"
     @dragstart="onDragStart"
     @dragend="onDragEnd"
     @click="onCardClick"
   >
-    <div class="item-header">
-      <span class="item-title">{{ item.title }}</span>
-      <button class="item-delete" @click.stop="confirmRemoveItem" title="Delete item">×</button>
+    <!-- Title row -->
+    <div class="flex items-start gap-2 mb-[8px]">
+      <span class="flex-1 text-[15px] font-medium leading-snug break-words text-app-text">{{ item.title }}</span>
+      <button
+        class="item-delete bg-transparent border-none text-app-muted text-base cursor-pointer px-[2px] leading-none opacity-0 transition-opacity duration-100 shrink-0 mt-[1px]"
+        @click.stop="confirmRemoveItem"
+        title="Delete item"
+      >×</button>
     </div>
 
-    <div class="item-footer" v-if="item.tags.length > 0 || hasDescription">
-      <div class="item-tags" v-if="item.tags.length > 0">
+    <!-- Tags + description indicator -->
+    <div class="flex items-center justify-between gap-2" v-if="item.tags.length > 0 || hasDescription">
+      <div class="flex flex-wrap gap-1 flex-1" v-if="item.tags.length > 0">
         <TagBadge
           v-for="tagId in item.tags"
           :key="tagId"
           :tag="store.tags.find(t => t.id === tagId)!"
         />
       </div>
-      <svg v-if="hasDescription" class="desc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Has description">
+      <svg v-if="hasDescription" class="w-[11px] h-[11px] text-app-muted shrink-0 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Has description">
         <line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/>
       </svg>
     </div>
@@ -70,71 +76,6 @@ function onDragEnd() {
 </script>
 
 <style scoped>
-.kanban-item {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  cursor: pointer;
-  transition: box-shadow 0.15s, opacity 0.15s, border-color 0.15s;
-  position: relative;
-}
-.kanban-item:hover {
-  border-color: var(--accent);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-}
-.kanban-item.is-dragging {
-  opacity: 0.4;
-  cursor: grabbing;
-}
-
-.item-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-.item-title {
-  flex: 1;
-  font-size: 13px;
-  line-height: 1.5;
-  word-break: break-word;
-}
-
-.item-delete {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 16px;
-  cursor: pointer;
-  padding: 0 2px;
-  line-height: 1;
-  opacity: 0;
-  transition: opacity 0.1s;
-  flex-shrink: 0;
-}
 .kanban-item:hover .item-delete { opacity: 0.6; }
 .item-delete:hover { opacity: 1 !important; color: #ef4444; }
-
-.item-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 8px;
-  gap: 6px;
-}
-
-.item-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  flex: 1;
-}
-
-.desc-icon {
-  width: 12px;
-  height: 12px;
-  color: var(--text-muted);
-  flex-shrink: 0;
-  opacity: 0.6;
-}
 </style>
