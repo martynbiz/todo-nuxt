@@ -5,10 +5,10 @@ import { up as up0003 } from '../migrations/0003_user_name'
 import { up as up0004 } from '../migrations/0004_user_theme'
 
 const migrations = [
-  { name: '0001_init',          up: up0001 },
-  { name: '0002_user_scoping',  up: up0002 },
-  { name: '0003_user_name',     up: up0003 },
-  { name: '0004_user_theme',    up: up0004 },
+  { name: '0001_init',         up: up0001 },
+  { name: '0002_user_scoping', up: up0002 },
+  { name: '0003_user_name',    up: up0003 },
+  { name: '0004_user_theme',   up: up0004 },
 ]
 
 export default defineNitroPlugin(async () => {

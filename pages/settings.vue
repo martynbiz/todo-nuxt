@@ -40,12 +40,111 @@
         </div>
       </section>
 
+      <!-- Data -->
+      <section class="card">
+        <h2 class="card-title">Data</h2>
+
+        <!-- Export -->
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>Export</span>
+            <span class="setting-hint">Download all boards, items and tags as JSON</span>
+          </div>
+          <button class="btn-secondary" :disabled="exporting" @click="exportData">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            {{ exporting ? 'Exporting…' : 'Export JSON' }}
+          </button>
+        </div>
+
+        <div class="setting-divider" />
+
+        <!-- Import -->
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>Import</span>
+            <span class="setting-hint">Restore from a previously exported JSON file</span>
+          </div>
+          <label class="btn-secondary btn-file">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Choose file
+            <input type="file" accept=".json,application/json" @change="onFileChange" />
+          </label>
+        </div>
+
+        <div v-if="importFile" class="import-footer">
+          <span class="import-filename">{{ importFile.name }}</span>
+          <button class="btn-primary" :disabled="importing" @click="importData">
+            {{ importing ? 'Importing…' : 'Import' }}
+          </button>
+        </div>
+
+        <p v-if="importError" class="msg msg--error">{{ importError }}</p>
+        <p v-if="importResult" class="msg msg--success">{{ importResult }}</p>
+      </section>
+
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useKanbanStore } from '~/stores/kanban'
+
 const { theme, apply } = useTheme()
+const kanban = useKanbanStore()
+
+// Export
+const exporting = ref(false)
+
+async function exportData() {
+  exporting.value = true
+  try {
+    const data = await $fetch('/api/export')
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `kanban-export-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  } finally {
+    exporting.value = false
+  }
+}
+
+// Import
+const importFile = ref<File | null>(null)
+const importing = ref(false)
+const importError = ref('')
+const importResult = ref('')
+
+function onFileChange(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0] ?? null
+  importFile.value = file
+  importError.value = ''
+  importResult.value = ''
+}
+
+async function importData() {
+  if (!importFile.value) return
+  importError.value = ''
+  importResult.value = ''
+  importing.value = true
+  try {
+    const text = await importFile.value.text()
+    const json = JSON.parse(text)
+    const result = await $fetch<{ importedBoards: number; importedItems: number; importedTags: number }>('/api/import', {
+      method: 'POST',
+      body: json,
+    })
+    importResult.value = `Imported ${result.importedBoards} board(s), ${result.importedItems} item(s), ${result.importedTags} tag(s).`
+    importFile.value = null
+    await kanban.init()
+  } catch (e: any) {
+    importError.value = e?.data?.message ?? 'Import failed — make sure the file is a valid export.'
+  } finally {
+    importing.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -165,4 +264,80 @@ const { theme, apply } = useTheme()
 .theme-btn:not(.active):hover {
   color: var(--text);
 }
+
+.setting-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s;
+}
+.btn-secondary:hover:not(:disabled) { border-color: var(--text-muted); }
+.btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary svg { width: 14px; height: 14px; }
+
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+.btn-file input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 0;
+}
+
+.import-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.import-filename {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.15s;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.1); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.msg {
+  font-size: 13px;
+  margin-top: 12px;
+}
+.msg--error { color: #ef4444; }
+.msg--success { color: #10b981; }
 </style>
