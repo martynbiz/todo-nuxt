@@ -15,7 +15,7 @@
         <template v-if="auth.user">
           <div class="px-3 pt-[10px] pb-2">
             <div class="text-[13px] font-semibold text-app-text whitespace-nowrap overflow-hidden text-ellipsis">{{ auth.user.name || '—' }}</div>
-            <div class="text-[11px] text-app-muted mt-[2px] whitespace-nowrap overflow-hidden text-ellipsis">{{ auth.user.email }}</div>
+            <div class="text-[11px] text-app-muted mt-[2px] whitespace-nowrap overflow-hidden text-ellipsis">{{ displayEmail }}</div>
           </div>
           <div class="h-px bg-app-border my-1" />
           <button class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left transition-colors duration-100 hover:bg-app-board" @click="go('/profile')">
@@ -33,14 +33,10 @@
           </button>
         </template>
         <template v-else>
-          <button class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left transition-colors duration-100 hover:bg-app-board" @click="go('/login')">
-            <svg class="w-[15px] h-[15px] shrink-0 text-app-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-            Log in
-          </button>
-          <button class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left transition-colors duration-100 hover:bg-app-board" @click="go('/login')">
-            <svg class="w-[15px] h-[15px] shrink-0 text-app-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-            Create account
-          </button>
+          <a class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left no-underline transition-colors duration-100 hover:bg-app-board" href="/auth/microsoft">
+            <svg class="w-[15px] h-[15px] shrink-0 text-app-muted" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+            Sign in with Microsoft
+          </a>
         </template>
       </div>
     </Transition>
@@ -58,6 +54,18 @@ const open = ref(false)
 const menuRef = ref<HTMLElement | null>(null)
 
 const AVATAR_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444']
+
+// Decode stored #EXT# UPNs for display (e.g. user_domain.com#ext#@tenant → user@domain.com)
+function decodeEmail(email: string): string {
+  const m = email.toLowerCase().match(/^(.+)#ext#@.+$/)
+  if (m) {
+    const i = m[1].lastIndexOf('_')
+    if (i !== -1) return m[1].slice(0, i) + '@' + m[1].slice(i + 1)
+  }
+  return email
+}
+
+const displayEmail = computed(() => decodeEmail(auth.user?.email ?? ''))
 
 const initial = computed(() => {
   const str = auth.user?.name || auth.user?.email || '?'

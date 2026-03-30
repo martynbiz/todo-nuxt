@@ -1,10 +1,22 @@
 import { randomBytes } from 'crypto'
 import { getDb } from '../../db'
 
+// Decode Microsoft guest UPN format: localpart_domain#EXT#@tenant → localpart@domain
+function decodeEmail(mail: string | null | undefined, upn: string | null | undefined): string {
+  if (mail) return mail.toLowerCase().trim()
+  const raw = (upn ?? '').toLowerCase().trim()
+  const m = raw.match(/^(.+)#ext#@.+$/)
+  if (m) {
+    const i = m[1].lastIndexOf('_')
+    if (i !== -1) return m[1].slice(0, i) + '@' + m[1].slice(i + 1)
+  }
+  return raw
+}
+
 export default defineOAuthMicrosoftEventHandler({
   async onSuccess(event, { user: msUser }) {
     const sql = getDb()
-    const email = ((msUser.mail ?? msUser.userPrincipalName) as string ?? '').toLowerCase().trim()
+    const email = decodeEmail(msUser.mail as string, msUser.userPrincipalName as string)
     const entraId = msUser.id as string
     const displayName = (msUser.displayName as string) ?? ''
 

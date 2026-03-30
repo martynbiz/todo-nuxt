@@ -220,7 +220,7 @@ watch(() => modal.state.value, (val) => {
     loadComments(val.itemId)
   } else {
     title.value = ''
-    selectedTags.value = []
+    selectedTags.value = [...store.filterTags]
     editor.value?.commands.setContent('')
     comments.value = []
   }
