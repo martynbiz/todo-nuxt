@@ -10,7 +10,7 @@
         role="dialog"
         aria-modal="true"
         :aria-label="isNew ? 'New item' : 'Edit item'"
-        class="fixed top-0 right-0 bottom-0 w-[480px] max-w-full bg-app-card border-l border-app-border flex flex-col z-[201] shadow-[-24px_0_64px_rgba(0,0,0,0.25)]"
+        class="fixed top-0 right-0 bottom-0 w-[480px] max-w-full bg-app-card border-l border-app-border flex flex-col z-[500] shadow-[-24px_0_64px_rgba(0,0,0,0.25)]"
         @keydown.tab="trap"
       >
 
@@ -158,10 +158,23 @@
         </div><!-- end scrollable body -->
 
         <!-- Footer -->
-        <div class="flex justify-end gap-2 px-[18px] py-3 border-t border-app-border">
-          <button class="btn-cancel bg-transparent border border-app-border rounded-lg py-[7px] px-[14px] text-[13px] cursor-pointer text-app-muted hover:border-app-muted hover:text-app-text" @click="close">Cancel</button>
-          <button class="btn-save bg-app-accent text-white border-none rounded-lg py-[7px] px-[18px] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" @click="save" :disabled="!title.trim()">
-            {{ isNew ? 'Add Item' : 'Save' }}
+        <div class="flex items-center gap-2 px-[18px] py-3 border-t border-app-border">
+          <span
+            v-if="showSaved && !isNew"
+            class="text-[12px] text-green-500 mr-auto flex items-center gap-1"
+            aria-live="polite"
+          >
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Saved
+          </span>
+          <span v-else class="mr-auto" />
+          <button v-if="isNew" class="btn-cancel bg-transparent border border-app-border rounded-lg py-[7px] px-[14px] text-[13px] cursor-pointer text-app-muted hover:border-app-muted hover:text-app-text" @click="close">Cancel</button>
+          <button
+            class="btn-save bg-app-accent text-white border-none rounded-lg py-[7px] px-[18px] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            @click="save"
+            :disabled="!title.trim()"
+          >
+            {{isNew ? 'Create' : 'Done'}}
           </button>
         </div>
 
@@ -192,6 +205,7 @@ const usedTags = computed(() => {
 
 const title = ref('')
 const dueDate = ref('')
+const editorContent = ref('')
 const selectedTags = ref<string[]>([])
 const showTagPicker = ref(false)
 const newTagLabel = ref('')
@@ -223,12 +237,58 @@ watch(showTagPicker, (val) => {
   else document.removeEventListener('mousedown', onTagPickerClickOutside)
 })
 
-onUnmounted(() => document.removeEventListener('mousedown', onTagPickerClickOutside))
-
 const isNew = computed(() => modal.state.value?.itemId === null)
 
+// ─── Dirty tracking + auto-save ──────────────────────────────────────────────
+
+interface Snapshot { title: string; description: string; tags: string[]; due_date: string | null }
+const savedSnapshot = ref<Snapshot | null>(null)
+const showSaved = ref(false)
+let autoSaveTimer: ReturnType<typeof setTimeout> | null = null
+let showSavedTimer: ReturnType<typeof setTimeout> | null = null
+
+const isDirty = computed(() => {
+  if (!savedSnapshot.value || isNew.value) return false
+  return (
+    title.value.trim() !== savedSnapshot.value.title ||
+    editorContent.value !== savedSnapshot.value.description ||
+    (dueDate.value || null) !== savedSnapshot.value.due_date ||
+    JSON.stringify([...selectedTags.value].sort()) !== JSON.stringify([...savedSnapshot.value.tags].sort())
+  )
+})
+
+function cancelAutoSave() {
+  if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null }
+}
+
+function scheduleAutoSave() {
+  if (isNew.value || !savedSnapshot.value) return
+  cancelAutoSave()
+  autoSaveTimer = setTimeout(() => { if (isDirty.value) doSave() }, 1500)
+}
+
+watch([title, editorContent, dueDate], scheduleAutoSave)
+watch(selectedTags, scheduleAutoSave, { deep: true })
+
+function doSave() {
+  const t = title.value.trim()
+  if (!t || !modal.state.value?.itemId) return
+  const { boardId, itemId } = modal.state.value
+  const description = editorContent.value.replace(/<[^>]*>/g, '').trim() ? editorContent.value : ''
+  store.updateItem(boardId, itemId, { title: t, description, tags: [...selectedTags.value], due_date: dueDate.value || null })
+  savedSnapshot.value = { title: t, description, tags: [...selectedTags.value], due_date: dueDate.value || null }
+  showSaved.value = true
+  if (showSavedTimer) clearTimeout(showSavedTimer)
+  showSavedTimer = setTimeout(() => { showSaved.value = false }, 2000)
+}
+
+// ─── Modal open/close sync ────────────────────────────────────────────────────
+
 // Sync form state when modal opens
-watch(() => modal.state.value, (val) => {
+watch(() => modal.state.value, async (val) => {
+  cancelAutoSave()
+  savedSnapshot.value = null
+  showSaved.value = false
   if (!val) return
   if (val.itemId) {
     const board = store.boards.find(b => b.id === val.boardId)
@@ -238,6 +298,9 @@ watch(() => modal.state.value, (val) => {
       selectedTags.value = [...item.tags]
       dueDate.value = item.due_date ?? ''
       editor.value?.commands.setContent(item.description || '')
+      // Wait for editor to normalise content before snapshotting
+      await nextTick()
+      savedSnapshot.value = { title: item.title, description: editorContent.value, tags: [...item.tags], due_date: item.due_date ?? null }
     }
     loadComments(val.itemId)
   } else {
@@ -309,9 +372,17 @@ const editor = useEditor({
   editorProps: {
     attributes: { class: 'prose-editor' },
   },
+  onUpdate: ({ editor }) => {
+    editorContent.value = editor.getHTML()
+  },
 })
 
-onUnmounted(() => editor.value?.destroy())
+onUnmounted(() => {
+  editor.value?.destroy()
+  document.removeEventListener('mousedown', onTagPickerClickOutside)
+  cancelAutoSave()
+  if (showSavedTimer) clearTimeout(showSavedTimer)
+})
 
 const toolbarButtons = computed(() => [
   { label: 'Bold',        icon: 'B',  active: () => !!editor.value?.isActive('bold'),        action: () => editor.value?.chain().focus().toggleBold().run() },
@@ -341,18 +412,18 @@ function save() {
   const t = title.value.trim()
   if (!t) return
   const { boardId, itemId } = modal.state.value!
-  const raw = editor.value?.getHTML() ?? ''
-  const description = raw.replace(/<[^>]*>/g, '').trim() ? raw : ''
-
   if (itemId) {
-    store.updateItem(boardId, itemId, { title: t, description, tags: selectedTags.value, due_date: dueDate.value || null })
+    cancelAutoSave()
+    doSave()
   } else {
+    const description = editorContent.value.replace(/<[^>]*>/g, '').trim() ? editorContent.value : ''
     store.addItem(boardId, t, description, selectedTags.value, dueDate.value || null)
   }
   close()
 }
 
 function close() {
+  cancelAutoSave()
   modal.close()
   showTagPicker.value = false
 }
