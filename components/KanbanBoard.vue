@@ -21,6 +21,17 @@
           class="board-title font-bold text-[13px] text-app-text select-none truncate"
           @dblclick="startEditTitle"
         >{{ board.title }}</span>
+        <button
+          v-if="!editingTitle"
+          class="board-rename bg-transparent border-none text-app-muted cursor-pointer leading-none px-[2px] opacity-0 transition-opacity duration-100 shrink-0 focus:opacity-100 focus:outline-2 focus:outline-black rounded"
+          :aria-label="`Rename board ${board.title}`"
+          @click.stop="startEditTitle"
+        >
+          <svg class="w-[11px] h-[11px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
         <input
           v-else
           ref="titleInput"
@@ -166,6 +177,8 @@ function onBoardDragEnd() {}
 </script>
 
 <style scoped>
-.kanban-board:hover .board-delete { opacity: 0.5; }
+.kanban-board:hover .board-delete,
+.kanban-board:hover .board-rename { opacity: 0.5; }
 .board-delete:hover, .board-delete:focus { opacity: 1 !important; color: #ef4444; outline: 2px solid black; }
+.board-rename:hover, .board-rename:focus { opacity: 1 !important; color: var(--text); }
 </style>

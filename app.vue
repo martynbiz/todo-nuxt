@@ -2,4 +2,5 @@
   <NuxtPage />
   <ItemModal />
   <ConfirmDialog />
+  <ChatAssistant />
 </template>
