@@ -14,7 +14,7 @@
   >
     <!-- Title row -->
     <div class="flex items-start gap-2 mb-[8px]">
-      <span class="flex-1 text-[15px] font-medium leading-snug break-words text-app-text">{{ item.title }}</span>
+      <span class="flex-1 text-[20px] md:text-base font-medium leading-snug break-words text-app-text">{{ item.title }}</span>
       <button
         class="item-delete bg-transparent border-none text-app-muted text-base cursor-pointer px-[2px] leading-none opacity-0 transition-opacity duration-100 shrink-0 mt-[1px]"
         :aria-label="`Delete ${item.title}`"
