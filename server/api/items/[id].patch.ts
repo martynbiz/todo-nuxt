@@ -17,6 +17,10 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  if (body.due_date !== undefined) {
+    await sql`UPDATE items SET due_date = ${body.due_date} WHERE id = ${id}`
+  }
+
   if (body.tags !== undefined) {
     await sql`DELETE FROM item_tags WHERE item_id = ${id}`
     if (body.tags.length > 0) {

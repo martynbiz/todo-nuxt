@@ -90,6 +90,26 @@
           </div>
         </div>
 
+        <!-- Due Date -->
+        <div class="px-[18px] pt-[10px] pb-[14px] border-t border-app-border">
+          <label for="item-due-date" class="block text-[11px] font-semibold text-app-muted uppercase tracking-[0.06em] mb-2">Due Date</label>
+          <div class="flex items-center gap-2">
+            <input
+              id="item-due-date"
+              type="date"
+              v-model="dueDate"
+              class="bg-app-input border border-app-border rounded-lg py-[6px] px-3 text-[13px] text-app-text outline-none transition-colors focus:border-app-accent"
+            />
+            <button
+              v-if="dueDate"
+              class="text-[11px] text-app-muted hover:text-app-text focus:outline-2 focus:outline-black rounded px-1"
+              aria-label="Clear due date"
+              type="button"
+              @click="dueDate = ''"
+            >Clear</button>
+          </div>
+        </div>
+
         <!-- Comments -->
         <div class="px-[18px] pt-[10px] pb-[14px] border-t border-app-border flex flex-col gap-3" v-if="!isNew">
           <div class="text-[11px] font-semibold text-app-muted uppercase tracking-[0.06em]">Comments</div>
@@ -171,6 +191,7 @@ const usedTags = computed(() => {
 })
 
 const title = ref('')
+const dueDate = ref('')
 const selectedTags = ref<string[]>([])
 const showTagPicker = ref(false)
 const newTagLabel = ref('')
@@ -215,12 +236,14 @@ watch(() => modal.state.value, (val) => {
     if (item) {
       title.value = item.title
       selectedTags.value = [...item.tags]
+      dueDate.value = item.due_date ?? ''
       editor.value?.commands.setContent(item.description || '')
     }
     loadComments(val.itemId)
   } else {
     title.value = ''
     selectedTags.value = [...store.filterTags]
+    dueDate.value = ''
     editor.value?.commands.setContent('')
     comments.value = []
   }
@@ -322,9 +345,9 @@ function save() {
   const description = raw.replace(/<[^>]*>/g, '').trim() ? raw : ''
 
   if (itemId) {
-    store.updateItem(boardId, itemId, { title: t, description, tags: selectedTags.value })
+    store.updateItem(boardId, itemId, { title: t, description, tags: selectedTags.value, due_date: dueDate.value || null })
   } else {
-    store.addItem(boardId, t, description, selectedTags.value)
+    store.addItem(boardId, t, description, selectedTags.value, dueDate.value || null)
   }
   close()
 }

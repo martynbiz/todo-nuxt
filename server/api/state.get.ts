@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
           title: i.title,
           description: i.description,
           tags: itemTags.filter(it => it.item_id === i.id).map(it => it.tag_id),
+          due_date: i.due_date ? (i.due_date as Date).toISOString().slice(0, 10) : null,
         })),
     })),
     tags: tags.map(t => ({ id: t.id, label: t.label, color: t.color })),

@@ -11,6 +11,7 @@ export interface Item {
   title: string
   description: string
   tags: string[]
+  due_date: string | null
 }
 
 export interface Board {
@@ -41,6 +42,12 @@ export const useKanbanStore = defineStore('kanban', {
       if (!board) return []
       if (state.filterTags.length === 0) return board.items
       return board.items.filter(item => item.tags.some(t => state.filterTags.includes(t)))
+    },
+    itemsWithDueDate: (state) => {
+      return state.boards
+        .flatMap(b => b.items.map(i => ({ ...i, boardId: b.id })))
+        .filter(i => i.due_date !== null)
+        .sort((a, b) => a.due_date! < b.due_date! ? -1 : a.due_date! > b.due_date! ? 1 : 0)
     },
   },
 
@@ -80,13 +87,13 @@ export const useKanbanStore = defineStore('kanban', {
       })
     },
 
-    async addItem(boardId: string, title: string, description = '', tags: string[] = []) {
+    async addItem(boardId: string, title: string, description = '', tags: string[] = [], due_date: string | null = null) {
       const id = uid()
       const board = this.boards.find(b => b.id === boardId)
       if (!board) return
       const position = board.items.length
-      board.items.push({ id, title, description, tags })
-      await $fetch('/api/items', { method: 'POST', body: { id, boardId, title, description, tags, position } })
+      board.items.push({ id, title, description, tags, due_date })
+      await $fetch('/api/items', { method: 'POST', body: { id, boardId, title, description, tags, position, due_date } })
     },
 
     async removeItem(boardId: string, itemId: string) {
