@@ -1,6 +1,6 @@
 <template>
   <div
-    class="kanban-board bg-app-board border border-app-border rounded-xl w-[288px] shrink-0 flex flex-col transition-[border-color,box-shadow] duration-150 min-h-[120px] overflow-hidden"
+    class="kanban-board bg-app-board border border-app-border rounded-xl w-full flex flex-col transition-[border-color,box-shadow] duration-150 min-h-[120px] overflow-hidden"
     :class="{ 'border-app-accent shadow-[0_0_0_2px_var(--accent-glow)]': isDragOver }"
     role="region"
     :aria-label="board.title"

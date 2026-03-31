@@ -62,19 +62,80 @@
     </nav>
 
     <!-- Boards (Kanban view) -->
-    <main v-if="activeView === 'kanban'" id="main-content" class="flex gap-4 p-6 overflow-x-auto flex-1 items-start"
+    <main v-if="activeView === 'kanban'" id="main-content" class="flex-1 p-6 overflow-hidden flex flex-col"
       @dragover.prevent="onBoardAreaDragOver" @drop="onBoardAreaDrop">
-      <KanbanBoard v-for="(board, index) in store.boards" :key="board.id" :board="board" :board-index="index"
-        @remove="store.removeBoard" @board-drag-start="onBoardDragStart" @board-drop="onBoardDrop" />
 
+      <!-- Empty state -->
       <div v-if="store.boards.length === 0"
-        class="flex flex-col items-center justify-center gap-3 text-app-muted text-sm p-16 w-full">
+        class="flex flex-col items-center justify-center gap-3 text-app-muted text-sm p-16 w-full flex-1">
         <svg class="w-10 h-10 opacity-30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="3" y="3" width="7" height="18" rx="2" />
           <rect x="14" y="3" width="7" height="11" rx="2" />
         </svg>
         <p class="text-[15px] font-semibold text-app-text opacity-40">No boards yet</p>
         <p class="text-[13px] opacity-60">Create your first board to get started</p>
+      </div>
+
+      <!-- Carousel -->
+      <div v-else class="flex flex-col gap-3">
+
+        <!-- Navigation bar (only when there are more boards than visible) -->
+        <div v-if="store.boards.length > visibleCount" class="flex items-center justify-between">
+          <button
+            class="w-8 h-8 flex items-center justify-center rounded-full bg-app-card border border-app-border text-app-text hover:bg-app-hover transition-colors focus:outline-2 focus:outline-black disabled:opacity-30 disabled:cursor-not-allowed"
+            :disabled="!canGoPrev"
+            aria-label="Show previous boards"
+            @click="prevCarousel"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+
+          <div class="flex gap-[6px]" role="group" aria-label="Board navigation">
+            <button
+              v-for="n in store.boards.length"
+              :key="n"
+              class="w-2 h-2 rounded-full transition-colors duration-150 focus:outline-2 focus:outline-black"
+              :class="(n - 1) >= carouselOffset && (n - 1) < carouselOffset + visibleCount
+                ? 'bg-app-accent'
+                : 'bg-app-border hover:bg-app-muted'"
+              :aria-label="`Go to board ${n}`"
+              @click="jumpToBoard(n - 1)"
+            />
+          </div>
+
+          <button
+            class="w-8 h-8 flex items-center justify-center rounded-full bg-app-card border border-app-border text-app-text hover:bg-app-hover transition-colors focus:outline-2 focus:outline-black disabled:opacity-30 disabled:cursor-not-allowed"
+            :disabled="!canGoNext"
+            aria-label="Show next boards"
+            @click="nextCarousel"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Viewport -->
+        <div ref="carouselEl" class="overflow-hidden" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
+          <div class="flex items-start" :style="trackStyle">
+            <div
+              v-for="(board, index) in store.boards"
+              :key="board.id"
+              class="flex-shrink-0"
+              :style="{ width: boardWidth + 'px' }"
+            >
+              <KanbanBoard
+                :board="board"
+                :board-index="index"
+                @remove="store.removeBoard"
+                @board-drag-start="onBoardDragStart"
+                @board-drop="onBoardDrop"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 
@@ -160,6 +221,73 @@ function onBoardAreaDrop(e: DragEvent) {
 }
 
 function onBoardDrop(_toIndex: number) { }
+
+// Carousel
+const carouselEl = ref<HTMLElement | null>(null)
+const carouselWidth = ref(1280)
+const windowWidth = ref(1280)
+const carouselOffset = ref(0)
+const GAP = 16
+
+function getVisibleCount(w: number) {
+  if (w < 640) return 1
+  if (w < 1024) return 2
+  if (w < 1280) return 3
+  return 4
+}
+
+const visibleCount = computed(() => getVisibleCount(windowWidth.value))
+const boardWidth = computed(() => (carouselWidth.value - GAP * (visibleCount.value - 1)) / visibleCount.value)
+const trackStyle = computed(() => ({
+  gap: `${GAP}px`,
+  transform: `translateX(${-(carouselOffset.value * (boardWidth.value + GAP))}px)`,
+  transition: 'transform 300ms ease-in-out',
+}))
+
+const canGoPrev = computed(() => carouselOffset.value > 0)
+const canGoNext = computed(() => carouselOffset.value + visibleCount.value < store.boards.length)
+
+function prevCarousel() {
+  carouselOffset.value = Math.max(0, carouselOffset.value - 1)
+}
+function nextCarousel() {
+  carouselOffset.value = Math.min(store.boards.length - visibleCount.value, carouselOffset.value + 1)
+}
+function jumpToBoard(index: number) {
+  carouselOffset.value = Math.max(0, Math.min(index, store.boards.length - visibleCount.value))
+}
+
+// Touch swipe
+let touchStartX = 0
+let touchStartY = 0
+function onTouchStart(e: TouchEvent) {
+  touchStartX = e.touches[0].clientX
+  touchStartY = e.touches[0].clientY
+}
+function onTouchEnd(e: TouchEvent) {
+  const dx = e.changedTouches[0].clientX - touchStartX
+  const dy = e.changedTouches[0].clientY - touchStartY
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+    if (dx < 0) nextCarousel()
+    else prevCarousel()
+  }
+}
+
+watch([() => store.boards.length, visibleCount], () => {
+  const maxOffset = Math.max(0, store.boards.length - visibleCount.value)
+  if (carouselOffset.value > maxOffset) carouselOffset.value = maxOffset
+})
+
+onMounted(() => {
+  windowWidth.value = window.innerWidth
+  if (carouselEl.value) carouselWidth.value = carouselEl.value.clientWidth
+  const onResize = () => {
+    windowWidth.value = window.innerWidth
+    if (carouselEl.value) carouselWidth.value = carouselEl.value.clientWidth
+  }
+  window.addEventListener('resize', onResize)
+  onUnmounted(() => window.removeEventListener('resize', onResize))
+})
 </script>
 
 <style scoped>
