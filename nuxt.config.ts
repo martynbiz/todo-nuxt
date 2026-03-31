@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devServer: { port: 3000 },
   runtimeConfig: {
-    openaiApiKey: process.env.OPENAI_API_KEY
+    openaiApiKey: '',
   },
   app: {
     head: {
