@@ -98,7 +98,7 @@
 import type { Board } from '~/stores/kanban'
 import { useKanbanStore } from '~/stores/kanban'
 
-const props = defineProps<{ board: Board; boardIndex: number }>()
+const props = defineProps<{ board: Board; boardIndex: number; autoFocusTitle?: boolean }>()
 const emit = defineEmits<{
   remove: [id: string]
   boardDragStart: [index: number]
@@ -132,6 +132,10 @@ function saveTitle() {
   if (t) store.renameBoard(props.board.id, t)
   editingTitle.value = false
 }
+
+onMounted(() => {
+  if (props.autoFocusTitle) startEditTitle()
+})
 
 const modal = useItemModal()
 

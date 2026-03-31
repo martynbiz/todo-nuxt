@@ -58,11 +58,12 @@ export const useKanbanStore = defineStore('kanban', {
       this.tags = data.tags
     },
 
-    async addBoard(title: string) {
+    async addBoard(title: string): Promise<string> {
       const id = uid()
       const position = this.boards.length
       this.boards.push({ id, title, items: [] })
       await $fetch('/api/boards', { method: 'POST', body: { id, title, position } })
+      return id
     },
 
     async removeBoard(boardId: string) {

@@ -10,15 +10,6 @@
       class="flex items-center justify-between py-[14px] px-6 border-b border-app-border bg-app-header sticky top-0 z-10">
       <h1 class="text-[17px] font-extrabold tracking-tight text-app-text">Todo</h1>
       <div class="flex items-center gap-3">
-        <button v-if="activeView === 'kanban'"
-          class="btn-add-board inline-flex items-center gap-[6px] bg-app-accent text-white border-none rounded-lg py-[7px] px-[14px] text-[13px] font-semibold cursor-pointer"
-          @click="openAddBoard">
-          <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          Add Board
-        </button>
         <div role="group" aria-label="View" class="flex rounded-lg border border-app-border overflow-hidden">
           <button
             class="py-[6px] px-3 text-[12px] font-semibold transition-colors duration-150 focus:outline-2 focus:outline-black"
@@ -33,18 +24,6 @@
       </div>
     </header>
 
-    <!-- Add board form -->
-    <div v-if="showAddBoard" class="flex items-center gap-2 py-3 px-6 bg-app-board border-b border-app-border">
-      <input ref="boardInput" v-model="newBoardTitle"
-        class="bg-app-input border border-app-accent rounded-lg py-2 px-3 text-sm text-app-text outline-none w-[240px]"
-        placeholder="Board name..." @keydown.enter="submitBoard" @keydown.esc="showAddBoard = false" />
-      <button
-        class="btn-confirm bg-app-accent text-white border-none rounded-lg py-2 px-4 text-[13px] font-semibold cursor-pointer"
-        @click="submitBoard">Create</button>
-      <button
-        class="border border-app-border rounded-lg py-2 px-3 text-[13px] cursor-pointer text-app-muted bg-transparent hover:border-app-muted hover:text-app-text"
-        @click="showAddBoard = false; newBoardTitle = ''">Cancel</button>
-    </div>
 
     <!-- Tag filter bar -->
     <nav aria-label="Filter by tag"
@@ -65,22 +44,11 @@
     <main v-if="activeView === 'kanban'" id="main-content" class="flex-1 p-6 overflow-hidden flex flex-col"
       @dragover.prevent="onBoardAreaDragOver" @drop="onBoardAreaDrop">
 
-      <!-- Empty state -->
-      <div v-if="store.boards.length === 0"
-        class="flex flex-col items-center justify-center gap-3 text-app-muted text-sm p-16 w-full flex-1">
-        <svg class="w-10 h-10 opacity-30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="3" y="3" width="7" height="18" rx="2" />
-          <rect x="14" y="3" width="7" height="11" rx="2" />
-        </svg>
-        <p class="text-[15px] font-semibold text-app-text opacity-40">No boards yet</p>
-        <p class="text-[13px] opacity-60">Create your first board to get started</p>
-      </div>
-
       <!-- Carousel -->
-      <div v-else class="flex flex-col gap-3">
+      <div class="flex flex-col gap-3">
 
-        <!-- Navigation bar (only when there are more boards than visible) -->
-        <div v-if="store.boards.length > visibleCount" class="flex items-center justify-between">
+        <!-- Navigation bar (only when total cards incl. ghost exceed visible slots) -->
+        <div v-if="store.boards.length + 1 > visibleCount" class="flex items-center justify-between">
           <button
             class="w-8 h-8 flex items-center justify-center rounded-full bg-app-card border border-app-border text-app-text hover:bg-app-hover transition-colors focus:outline-2 focus:outline-black disabled:opacity-30 disabled:cursor-not-allowed"
             :disabled="!canGoPrev"
@@ -129,10 +97,24 @@
               <KanbanBoard
                 :board="board"
                 :board-index="index"
+                :auto-focus-title="board.id === newBoardId"
                 @remove="store.removeBoard"
                 @board-drag-start="onBoardDragStart"
                 @board-drop="onBoardDrop"
               />
+            </div>
+            <!-- Add board ghost card -->
+            <div class="flex-shrink-0" :style="{ width: boardWidth + 'px' }">
+              <button
+                class="w-full min-h-[120px] flex flex-col items-center justify-center gap-2 bg-transparent border border-dashed border-app-border rounded-xl text-app-muted text-[13px] font-medium cursor-pointer transition-[border-color,color,background] duration-150 hover:border-app-accent hover:text-app-accent hover:bg-app-hover focus:outline-2 focus:outline-black"
+                aria-label="Create new board"
+                @click="addBoard"
+              >
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Create board
+              </button>
             </div>
           </div>
         </div>
@@ -163,32 +145,13 @@ const usedTags = computed(() => {
 })
 
 // Add board
-const showAddBoard = ref(false)
-const newBoardTitle = ref('')
-const boardInput = ref<HTMLInputElement | null>(null)
-let addBoardTriggerEl: HTMLElement | null = null
+const newBoardId = ref<string | null>(null)
 
-watch(showAddBoard, (val) => {
-  if (val) {
-    nextTick(() => boardInput.value?.focus())
-  } else {
-    addBoardTriggerEl?.focus()
-    addBoardTriggerEl = null
-  }
-})
-
-function openAddBoard() {
-  addBoardTriggerEl = document.activeElement as HTMLElement
-  showAddBoard.value = true
-}
-
-function submitBoard() {
-  const t = newBoardTitle.value.trim()
-  if (t) {
-    store.addBoard(t)
-    newBoardTitle.value = ''
-    showAddBoard.value = false
-  }
+function addBoard() {
+  store.addBoard('New board').then(id => {
+    newBoardId.value = id
+    setTimeout(() => { newBoardId.value = null }, 500)
+  })
 }
 
 // Board drag + drop reorder
@@ -244,17 +207,18 @@ const trackStyle = computed(() => ({
   transition: 'transform 300ms ease-in-out',
 }))
 
+const totalCards = computed(() => store.boards.length + 1) // boards + ghost add card
 const canGoPrev = computed(() => carouselOffset.value > 0)
-const canGoNext = computed(() => carouselOffset.value + visibleCount.value < store.boards.length)
+const canGoNext = computed(() => carouselOffset.value + visibleCount.value < totalCards.value)
 
 function prevCarousel() {
   carouselOffset.value = Math.max(0, carouselOffset.value - 1)
 }
 function nextCarousel() {
-  carouselOffset.value = Math.min(store.boards.length - visibleCount.value, carouselOffset.value + 1)
+  carouselOffset.value = Math.min(totalCards.value - visibleCount.value, carouselOffset.value + 1)
 }
 function jumpToBoard(index: number) {
-  carouselOffset.value = Math.max(0, Math.min(index, store.boards.length - visibleCount.value))
+  carouselOffset.value = Math.max(0, Math.min(index, totalCards.value - visibleCount.value))
 }
 
 // Touch swipe
@@ -273,8 +237,8 @@ function onTouchEnd(e: TouchEvent) {
   }
 }
 
-watch([() => store.boards.length, visibleCount], () => {
-  const maxOffset = Math.max(0, store.boards.length - visibleCount.value)
+watch([totalCards, visibleCount], () => {
+  const maxOffset = Math.max(0, totalCards.value - visibleCount.value)
   if (carouselOffset.value > maxOffset) carouselOffset.value = maxOffset
 })
 
@@ -291,14 +255,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.btn-add-board:hover {
-  filter: brightness(1.1);
-}
-
-.btn-confirm:hover {
-  filter: brightness(1.1);
-}
-
 .tag-filter-item:hover {
   filter: brightness(1.15);
 }
