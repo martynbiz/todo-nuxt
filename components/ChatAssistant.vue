@@ -1,4 +1,16 @@
 <template>
+  <!-- Create item button (shown only when boards exist) -->
+  <button
+    v-if="store.boards.length > 0"
+    class="fixed bottom-[88px] right-6 z-[400] w-14 h-14 rounded-full flex items-center justify-center shadow-lg border border-gray-200 bg-white text-slate-800 transition-all duration-200 hover:shadow-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900"
+    aria-label="Create new item"
+    @click="modal.openNew()"
+  >
+    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
   <!-- Floating trigger button -->
   <button
     class="fixed bottom-6 right-6 z-[400] w-14 h-14 rounded-full flex items-center justify-center shadow-lg border transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900"
@@ -124,6 +136,7 @@
 import { useKanbanStore } from '~/stores/kanban'
 
 const store = useKanbanStore()
+const modal = useItemModal()
 const { trapFocus } = useFocusTrap()
 
 const isOpen = ref(false)
@@ -178,9 +191,11 @@ async function send() {
   scrollToBottom()
 
   try {
+    const history = messages.value.slice(0, -1).map((m: ChatMessage) => ({ role: m.role, content: m.content }))
+
     const result = await $fetch<{ message: string; actionsApplied: number }>('/api/chat', {
       method: 'POST',
-      body: { prompt: text },
+      body: { prompt: text, history },
     })
 
     messages.value.push({

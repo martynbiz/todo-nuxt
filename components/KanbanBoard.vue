@@ -78,19 +78,6 @@
       </div>
     </div>
 
-    <!-- Add item -->
-    <div class="px-3 pb-3 pt-1">
-      <button
-        class="btn-add-item w-full flex items-center justify-center gap-[6px] bg-transparent border border-dashed border-app-border rounded-lg text-app-muted text-[12px] font-medium py-[9px] cursor-pointer transition-[border-color,color,background] duration-150 hover:border-app-accent hover:text-app-accent hover:bg-app-hover"
-        :aria-label="`Add item to ${board.title}`"
-        @click="modal.openNew(board.id)"
-      >
-        <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        Add item
-      </button>
-    </div>
   </div>
 </template>
 

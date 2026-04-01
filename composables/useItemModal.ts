@@ -9,7 +9,7 @@ const state = ref<ModalState | null>(null)
 let triggerEl: HTMLElement | null = null
 
 export function useItemModal() {
-  function openNew(boardId: string) {
+  function openNew(boardId: string = '') {
     triggerEl = document.activeElement as HTMLElement
     state.value = { boardId, itemId: null }
   }

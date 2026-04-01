@@ -110,6 +110,19 @@
           </div>
         </div>
 
+        <!-- Board (new items only) -->
+        <div v-if="isNew" class="px-[18px] pt-[10px] pb-[14px] border-t border-app-border">
+          <label for="item-board" class="block text-[11px] font-semibold text-app-muted uppercase tracking-[0.06em] mb-2">Board</label>
+          <select
+            id="item-board"
+            v-model="selectedBoardId"
+            class="bg-app-input border border-app-border rounded-lg py-[6px] px-3 text-[13px] text-app-text outline-none transition-colors focus:border-app-accent w-full"
+          >
+            <option value="" disabled>Select a board...</option>
+            <option v-for="board in store.boards" :key="board.id" :value="board.id">{{ board.title }}</option>
+          </select>
+        </div>
+
         <!-- Comments -->
         <div class="px-[18px] pt-[10px] pb-[14px] border-t border-app-border flex flex-col gap-3" v-if="!isNew">
           <div class="text-[11px] font-semibold text-app-muted uppercase tracking-[0.06em]">Comments</div>
@@ -172,7 +185,7 @@
           <button
             class="btn-save bg-app-accent text-white border-none rounded-lg py-[7px] px-[18px] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             @click="save"
-            :disabled="!title.trim()"
+            :disabled="!title.trim() || (isNew && !selectedBoardId)"
           >
             {{isNew ? 'Create' : 'Done'}}
           </button>
@@ -207,6 +220,7 @@ const title = ref('')
 const dueDate = ref('')
 const editorContent = ref('')
 const selectedTags = ref<string[]>([])
+const selectedBoardId = ref('')
 const showTagPicker = ref(false)
 const newTagLabel = ref('')
 const titleInput = ref<HTMLInputElement | null>(null)
@@ -307,6 +321,7 @@ watch(() => modal.state.value, async (val) => {
     title.value = ''
     selectedTags.value = [...store.filterTags]
     dueDate.value = ''
+    selectedBoardId.value = val.boardId || store.boards[0]?.id || ''
     editor.value?.commands.setContent('')
     comments.value = []
   }
@@ -411,13 +426,14 @@ async function createAndAssign() {
 function save() {
   const t = title.value.trim()
   if (!t) return
-  const { boardId, itemId } = modal.state.value!
+  const { itemId } = modal.state.value!
   if (itemId) {
     cancelAutoSave()
     doSave()
   } else {
+    if (!selectedBoardId.value) return
     const description = editorContent.value.replace(/<[^>]*>/g, '').trim() ? editorContent.value : ''
-    store.addItem(boardId, t, description, selectedTags.value, dueDate.value || null)
+    store.addItem(selectedBoardId.value, t, description, selectedTags.value, dueDate.value || null)
   }
   close()
 }

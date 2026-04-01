@@ -248,7 +248,7 @@ async function updateEmbeddings(sql: Sql, itemIds: string[]) {
 
 export default defineEventHandler(async (event) => {
   const userId = event.context.user.id
-  const { prompt } = await readBody(event)
+  const { prompt, history } = await readBody(event)
   if (!prompt?.trim()) throw createError({ statusCode: 400, message: 'Prompt is required' })
 
   const sql = getDb()
@@ -309,12 +309,17 @@ export default defineEventHandler(async (event) => {
   const context = `Today's date: ${today}\n\nCurrent board state:\n\n${boardContext}\n${tagsContext}${semanticHint}`
 
   // 5. Call OpenAI with forced tool use
+  const priorMessages: { role: 'user' | 'assistant'; content: string }[] = Array.isArray(history)
+    ? history.map((m: { role: string; content: string }) => ({ role: m.role as 'user' | 'assistant', content: m.content }))
+    : []
+
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o',
     tool_choice: { type: 'function', function: { name: 'apply_changes' } },
     tools: [APPLY_CHANGES_TOOL],
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
+      ...priorMessages,
       { role: 'user', content: `${context}\n\nRequest: ${prompt.trim()}` },
     ],
   })
