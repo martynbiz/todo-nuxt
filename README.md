@@ -100,9 +100,13 @@ npm install
 
 ### 2. Start PostgreSQL via Docker Compose
 
+A `docker-compose.override.yml` file is included that exposes PostgreSQL on `localhost:5432` for local development. It is picked up automatically — no extra flags needed:
+
 ```bash
 docker compose up postgres -d
 ```
+
+> **Production note:** the override file is not needed in production (the app and database share a Docker network). Add `COMPOSE_FILE=docker-compose.yml` to your production `.env` to skip it.
 
 Or use an existing local PostgreSQL install:
 
