@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 const route = useRoute()
-const error = computed(() => route.query.error === 'oauth')
+const error = computed(() => ['oauth', 'session'].includes(route.query.error as string))
 </script>
 
 <style scoped>

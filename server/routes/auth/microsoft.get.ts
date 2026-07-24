@@ -15,34 +15,39 @@ function decodeEmail(mail: string | null | undefined, upn: string | null | undef
 
 export default defineOAuthMicrosoftEventHandler({
   async onSuccess(event, { user: msUser }) {
-    const sql = getDb()
-    const email = decodeEmail(msUser.mail as string, msUser.userPrincipalName as string)
-    const entraId = msUser.id as string
-    const displayName = (msUser.displayName as string) ?? ''
+    try {
+      const sql = getDb()
+      const email = decodeEmail(msUser.mail as string, msUser.userPrincipalName as string)
+      const entraId = msUser.id as string
+      const displayName = (msUser.displayName as string) ?? ''
 
-    console.log(`[auth] Microsoft login: entraId=${entraId} email=${email}`)
+      console.log(`[auth] Microsoft login: entraId=${entraId} email=${email}`)
 
-    let [user] = await sql`SELECT * FROM users WHERE entra_id = ${entraId}`
-    if (!user && email) {
-      ;[user] = await sql`SELECT * FROM users WHERE LOWER(email) = ${email}`
+      let [user] = await sql`SELECT * FROM users WHERE entra_id = ${entraId}`
+      if (!user && email) {
+        ;[user] = await sql`SELECT * FROM users WHERE LOWER(email) = ${email}`
+      }
+
+      if (!user) {
+        const id = randomBytes(16).toString('hex')
+        ;[user] = await sql`
+          INSERT INTO users (id, email, entra_id, name, password_hash)
+          VALUES (${id}, ${email}, ${entraId}, ${displayName}, NULL)
+          RETURNING *
+        `
+      } else if (user.entra_id !== entraId) {
+        await sql`UPDATE users SET entra_id = ${entraId} WHERE id = ${user.id}`
+      }
+
+      await setUserSession(event, {
+        user: { id: user.id, name: user.name, email: user.email, theme: user.theme },
+      })
+
+      return sendRedirect(event, '/')
+    } catch (error) {
+      console.error('[auth] Post-login user provisioning failed:', error)
+      return sendRedirect(event, '/login?error=session')
     }
-
-    if (!user) {
-      const id = randomBytes(16).toString('hex')
-      ;[user] = await sql`
-        INSERT INTO users (id, email, entra_id, name, password_hash)
-        VALUES (${id}, ${email}, ${entraId}, ${displayName}, NULL)
-        RETURNING *
-      `
-    } else if (user.entra_id !== entraId) {
-      await sql`UPDATE users SET entra_id = ${entraId} WHERE id = ${user.id}`
-    }
-
-    await setUserSession(event, {
-      user: { id: user.id, name: user.name, email: user.email, theme: user.theme },
-    })
-
-    return sendRedirect(event, '/')
   },
   onError(event, error) {
     console.error('Microsoft OAuth error:', error)
