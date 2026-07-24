@@ -29,7 +29,7 @@
           <div class="flex items-center justify-end gap-3 mt-1 flex-wrap">
             <p v-if="profileError" class="text-[13px] text-red-500 flex-1">{{ profileError }}</p>
             <p v-if="profileSuccess" class="text-[13px] text-emerald-500 flex-1">{{ profileSuccess }}</p>
-            <button type="submit" class="btn-primary bg-app-accent text-white border-none rounded-lg py-[9px] px-5 text-[13px] font-semibold cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed" :disabled="profileLoading">
+            <button type="submit" class="btn-primary bg-app-text text-app-bg border border-app-border shadow-brutal-sm rounded-lg py-[9px] px-5 text-[13px] font-semibold cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" :disabled="profileLoading">
               {{ profileLoading ? 'Saving…' : 'Save changes' }}
             </button>
           </div>
@@ -66,5 +66,5 @@ async function saveProfile() {
 </script>
 
 <style scoped>
-.btn-primary:hover:not(:disabled) { filter: brightness(1.1); }
+.btn-primary:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: none; }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <span
-    class="tag-badge inline-flex items-center gap-[3px] py-[2px] px-2 rounded-full text-[11px] font-semibold tracking-[0.02em] whitespace-nowrap leading-relaxed"
-    :style="{ border: `1px solid ${tag.color}`, color: tag.color, backgroundColor: 'transparent' }"
+    class="tag-badge inline-flex items-center gap-[3px] py-[2px] px-2 text-[11px] font-semibold tracking-[0.02em] whitespace-nowrap leading-relaxed"
+    :style="{ backgroundColor: tag.color, color: contrastText(tag.color) }"
   >
     {{ tag.label }}
     <button
@@ -15,6 +15,7 @@
 
 <script setup lang="ts">
 import type { Tag } from '~/stores/kanban'
+import { contrastText } from '~/composables/useContrastText'
 
 defineProps<{ tag: Tag; removable?: boolean }>()
 defineEmits<{ remove: [id: string] }>()

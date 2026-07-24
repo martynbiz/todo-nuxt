@@ -10,7 +10,7 @@
         role="alertdialog"
         aria-modal="true"
         aria-describedby="confirm-message"
-        class="bg-app-card border border-app-border rounded-xl p-6 w-[320px] shadow-[0_16px_48px_rgba(0,0,0,0.4)]"
+        class="bg-app-card border border-app-border rounded-xl p-6 w-[320px] shadow-brutal-lg"
         @keydown.tab.prevent="trap"
         @keydown.esc="respond(false)"
       >
@@ -18,11 +18,11 @@
         <div class="flex justify-end gap-2">
           <button
             ref="cancelBtn"
-            class="bg-transparent border border-app-border rounded-lg py-[7px] px-[14px] text-[13px] cursor-pointer text-app-muted hover:border-app-muted hover:text-app-text"
+            class="bg-app-card border-2 border-app-border rounded-lg py-[7px] px-[14px] text-[13px] cursor-pointer text-app-text hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
             @click="respond(false)"
           >Cancel</button>
           <button
-            class="btn-delete bg-red-500 text-white border-none rounded-lg py-[7px] px-[14px] text-[13px] font-semibold cursor-pointer"
+            class="btn-delete bg-app-text text-app-bg border-2 border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[14px] text-[13px] font-semibold cursor-pointer focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
             @click="respond(true)"
           >{{ pending.confirmLabel }}</button>
         </div>
@@ -48,5 +48,5 @@ function trap(e: KeyboardEvent) {
 </script>
 
 <style scoped>
-.btn-delete:hover { filter: brightness(1.1); }
+.btn-delete:hover { transform: translate(1px, 1px); box-shadow: none; }
 </style>

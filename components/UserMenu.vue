@@ -1,7 +1,7 @@
 <template>
   <div class="relative" ref="menuRef">
-    <button class="w-[34px] h-[34px] rounded-full border-none p-0 cursor-pointer flex items-center justify-center bg-app-card transition-opacity duration-150 hover:opacity-85" @click="open = !open" :title="auth.user?.email">
-      <span v-if="auth.user" class="w-[34px] h-[34px] rounded-full flex items-center justify-center text-sm font-bold text-white" :style="{ background: avatarColor }">
+    <button class="w-[34px] h-[34px] rounded-full border border-app-border p-0 cursor-pointer flex items-center justify-center bg-app-card transition-opacity duration-150 hover:opacity-85 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" @click="open = !open" :title="auth.user?.email">
+      <span v-if="auth.user" class="w-[34px] h-[34px] rounded-full flex items-center justify-center text-sm font-bold bg-app-text text-app-bg">
         {{ initial }}
       </span>
       <svg v-else class="w-[18px] h-[18px] text-app-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -11,7 +11,7 @@
     </button>
 
     <Transition name="dropdown">
-      <div v-if="open" class="absolute right-0 top-[calc(100%+8px)] bg-app-card border border-app-border rounded-xl shadow-2xl min-w-[200px] p-[6px] z-[100]">
+      <div v-if="open" class="absolute right-0 top-[calc(100%+8px)] bg-app-card border border-app-border rounded-xl shadow-brutal min-w-[200px] p-[6px] z-[100]">
         <template v-if="auth.user">
           <div class="px-3 pt-[10px] pb-2">
             <div class="text-[13px] font-semibold text-app-text whitespace-nowrap overflow-hidden text-ellipsis">{{ auth.user.name || '—' }}</div>
@@ -27,8 +27,8 @@
             Settings
           </button>
           <div class="h-px bg-app-border my-1" />
-          <button class="flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-red-500 cursor-pointer text-left transition-colors duration-100 hover:bg-red-500/[0.08]" @click="logout">
-            <svg class="w-[15px] h-[15px] shrink-0 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <button class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left transition-colors duration-100 hover:bg-app-board" @click="logout">
+            <svg class="w-[15px] h-[15px] shrink-0 text-app-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Log out
           </button>
         </template>
@@ -53,8 +53,6 @@ const kanban = useKanbanStore()
 const open = ref(false)
 const menuRef = ref<HTMLElement | null>(null)
 
-const AVATAR_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444']
-
 // Decode stored #EXT# UPNs for display (e.g. user_domain.com#ext#@tenant → user@domain.com)
 function decodeEmail(email: string): string {
   const m = email.toLowerCase().match(/^(.+)#ext#@.+$/)
@@ -70,13 +68,6 @@ const displayEmail = computed(() => decodeEmail(auth.user?.email ?? ''))
 const initial = computed(() => {
   const str = auth.user?.name || auth.user?.email || '?'
   return str[0].toUpperCase()
-})
-
-const avatarColor = computed(() => {
-  const str = auth.user?.name || auth.user?.email || ''
-  let hash = 0
-  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash)
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
 })
 
 function onClickOutside(e: MouseEvent) {

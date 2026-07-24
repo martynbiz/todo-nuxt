@@ -1,34 +1,36 @@
+@import '@fontsource/space-mono/400.css';
+@import '@fontsource/space-mono/700.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* CSS custom properties — dark theme */
+/* CSS custom properties — dark theme (default): inverted 1-bit, white on black */
 :root {
-  --bg: #0f1117;
-  --header-bg: #13161e;
-  --board-bg: #1a1d27;
-  --card-bg: #1f2333;
-  --border: #2a2d3e;
-  --hover-bg: #252840;
-  --input-bg: #252840;
-  --text: #e2e4f0;
-  --text-muted: #9ca3af; /* #9ca3af on #1f2333 ≈ 6.2:1 — passes AA */
-  --accent: #6366f1;
-  --accent-glow: rgba(99, 102, 241, 0.25);
+  --bg: #000000;
+  --header-bg: #000000;
+  --board-bg: #000000;
+  --card-bg: #000000;
+  --border: #ffffff;
+  --hover-bg: #1a1a1a;
+  --input-bg: #000000;
+  --text: #ffffff;
+  --text-muted: #9ca3af; /* #9ca3af on #000000 ≈ 8.4:1 — passes AA */
+  --accent: #6366f1; /* focus rings + drag-target indicator only, not decorative */
 }
 
+/* Light theme: 1-bit, black on white */
 [data-theme="light"] {
-  --bg: #f0f2f5;
+  --bg: #ffffff;
   --header-bg: #ffffff;
   --board-bg: #ffffff;
   --card-bg: #ffffff;
-  --border: #d1d5db;
-  --hover-bg: #eaecef;
+  --border: #000000;
+  --hover-bg: #f0f0f0;
   --input-bg: #ffffff;
-  --text: #111827;
-  --text-muted: #6b7280;
+  --text: #000000;
+  --text-muted: #4b5563; /* #4b5563 on #ffffff ≈ 7.5:1 — passes AA */
   --accent: #6366f1;
-  --accent-glow: rgba(99, 102, 241, 0.15);
 }
 
 *, *::before, *::after {
@@ -38,7 +40,7 @@
 }
 
 html, body {
-  font-family: "Courier New", Courier, monospace;
+  font-family: 'Space Mono', 'Courier New', monospace;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -48,7 +50,7 @@ html, body {
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 0; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 /* Tag badge scoped styles need to reach through */
@@ -57,8 +59,8 @@ html, body {
   align-items: center;
   gap: 3px;
   padding: 2px 8px;
-  border-radius: 999px;
-  border: none;
+  border-radius: 0;
+  border: 2px solid var(--border);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;

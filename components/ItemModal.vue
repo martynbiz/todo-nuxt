@@ -10,7 +10,7 @@
         role="dialog"
         aria-modal="true"
         :aria-label="isNew ? 'New item' : 'Edit item'"
-        class="fixed top-0 right-0 bottom-0 w-[480px] max-w-full bg-app-card border-l border-app-border flex flex-col z-[500] shadow-[-24px_0_64px_rgba(0,0,0,0.25)]"
+        class="fixed top-0 right-0 bottom-0 w-[480px] max-w-full bg-app-card border-l border-app-border flex flex-col z-[500] shadow-brutal-lg"
         @keydown.tab="trap"
       >
 
@@ -33,7 +33,7 @@
           <button
             v-for="btn in toolbarButtons"
             :key="btn.label"
-            class="toolbar-btn bg-transparent border border-transparent rounded-[5px] text-app-muted text-xs font-bold cursor-pointer py-[3px] px-2 min-w-[28px] text-center transition-[background,color] duration-100 hover:bg-app-hover hover:text-app-text"
+            class="toolbar-btn bg-transparent border border-transparent rounded text-app-muted text-xs font-bold cursor-pointer py-[3px] px-2 min-w-[28px] text-center transition-[background,color] duration-100 hover:bg-app-hover hover:text-app-text"
             :class="{ 'bg-app-hover text-app-accent border-app-border': btn.active() }"
             @click="btn.action()"
             :aria-label="btn.label"
@@ -63,19 +63,19 @@
             <div class="relative" ref="tagPickerRef">
               <button ref="addTagBtn" class="btn-add-tag bg-transparent border border-dashed border-app-border rounded-full text-[11px] text-app-muted py-[2px] px-2 cursor-pointer transition-[border-color,color] duration-100 hover:border-app-accent hover:text-app-accent" @click="showTagPicker = !showTagPicker">+ tag</button>
               <div v-if="showTagPicker" class="absolute top-[calc(100%+4px)] left-0 z-[300] w-[200px]" @focusout="onTagPickerFocusOut" @keydown.esc.stop="closeTagPicker">
-                <div class="bg-app-card border border-app-border rounded-lg p-[6px] shadow-[0_8px_24px_rgba(0,0,0,0.3)] flex flex-col gap-[3px]">
+                <div class="bg-app-card border border-app-border rounded-lg p-[6px] shadow-brutal-sm flex flex-col gap-[3px]">
                   <button
                     v-for="tag in usedTags"
                     :key="tag.id"
                     type="button"
-                    class="flex items-center justify-between px-[6px] py-1 rounded cursor-pointer bg-transparent border-none w-full text-left hover:bg-app-hover focus:outline-2 focus:outline-black"
+                    class="flex items-center justify-between px-[6px] py-1 rounded cursor-pointer bg-transparent border-none w-full text-left hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
                     :class="{ 'bg-app-hover': selectedTags.includes(tag.id) }"
                     @click="toggleTag(tag.id)"
                   >
                     <TagBadge :tag="tag" />
                     <span v-if="selectedTags.includes(tag.id)" class="text-app-accent font-bold text-[11px]">✓</span>
                   </button>
-                  <button v-if="newTagLabel.trim()" type="button" class="btn-create-tag bg-app-accent text-white border-none rounded text-[11px] cursor-pointer py-1 px-2 w-full text-left focus:outline-2 focus:outline-black" @click="createAndAssign">Create "{{ newTagLabel }}"</button>
+                  <button v-if="newTagLabel.trim()" type="button" class="btn-create-tag bg-app-text text-app-bg border border-app-border rounded text-[11px] cursor-pointer py-1 px-2 w-full text-left focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" @click="createAndAssign">Create "{{ newTagLabel }}"</button>
                   <input
                     ref="tagInput"
                     v-model="newTagLabel"
@@ -102,7 +102,7 @@
             />
             <button
               v-if="dueDate"
-              class="text-[11px] text-app-muted hover:text-app-text focus:outline-2 focus:outline-black rounded px-1"
+              class="text-[11px] text-app-muted hover:text-app-text focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 rounded px-1"
               aria-label="Clear due date"
               type="button"
               @click="dueDate = ''"
@@ -131,8 +131,7 @@
           <div class="flex flex-col gap-3" v-if="comments.length > 0">
             <div v-for="comment in comments" :key="comment.id" class="flex gap-[10px] group">
               <div
-                class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0 mt-[1px]"
-                :style="{ backgroundColor: authorColor(comment.author.email) }"
+                class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold bg-app-text text-app-bg border border-app-border shrink-0 mt-[1px]"
               >{{ comment.author.name?.[0]?.toUpperCase() ?? '?' }}</div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-baseline gap-2 flex-wrap">
@@ -140,7 +139,7 @@
                   <span class="text-[11px] text-app-muted">{{ formatTime(comment.createdAt) }}</span>
                   <button
                     v-if="comment.isOwn"
-                    class="text-[11px] text-app-muted opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 focus:opacity-100 focus:text-red-500 focus:outline-2 focus:outline-black ml-auto"
+                    class="text-[11px] text-app-muted opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 focus:opacity-100 focus:text-red-500 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 ml-auto"
                     @click="deleteComment(comment.id)"
                   >Delete</button>
                 </div>
@@ -161,7 +160,7 @@
               @keydown.enter.exact.prevent="submitComment"
             />
             <button
-              class="btn-comment bg-app-accent text-white border-none rounded-lg py-[8px] px-3 text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+              class="btn-comment bg-app-text text-app-bg border border-app-border rounded-lg py-[8px] px-3 text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
               :disabled="!newComment.trim()"
               @click="submitComment"
             >Post</button>
@@ -181,9 +180,9 @@
             Saved
           </span>
           <span v-else class="mr-auto" />
-          <button v-if="isNew" class="btn-cancel bg-transparent border border-app-border rounded-lg py-[7px] px-[14px] text-[13px] cursor-pointer text-app-muted hover:border-app-muted hover:text-app-text" @click="close">Cancel</button>
+          <button v-if="isNew" class="btn-cancel bg-app-card border border-app-border rounded-lg py-[7px] px-[14px] text-[13px] cursor-pointer text-app-text hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" @click="close">Cancel</button>
           <button
-            class="btn-save bg-app-accent text-white border-none rounded-lg py-[7px] px-[18px] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            class="btn-save bg-app-text text-app-bg border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[18px] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
             @click="save"
             :disabled="!title.trim() || (isNew && !selectedBoardId)"
           >
@@ -339,13 +338,6 @@ interface Comment {
   author: { name: string; email: string }
 }
 
-const AVATAR_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444']
-function authorColor(email: string) {
-  let hash = 0
-  for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash)
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
-}
-
 function formatTime(iso: string) {
   const d = new Date(iso)
   const now = new Date()
@@ -446,9 +438,9 @@ function close() {
 </script>
 
 <style scoped>
-.btn-save:hover:not(:disabled) { filter: brightness(1.1); }
-.btn-create-tag:hover { filter: brightness(1.1); }
-.btn-comment:hover:not(:disabled) { filter: brightness(1.1); }
+.btn-save:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: none; }
+.btn-create-tag:hover { filter: invert(1); }
+.btn-comment:hover:not(:disabled) { filter: invert(1); }
 
 .sidebar-enter-active,
 .sidebar-leave-active {

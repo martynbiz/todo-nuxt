@@ -20,7 +20,7 @@
         <ul class="flex flex-col gap-2" :aria-label="`Items due ${group.heading}`">
           <li v-for="item in group.items" :key="item.id">
             <button
-              class="w-full text-left bg-app-card border border-app-border rounded-xl py-3 px-4 hover:border-app-accent/40 hover:shadow-md transition-all duration-150 focus:outline-2 focus:outline-black"
+              class="w-full text-left bg-app-card border border-app-border rounded-xl py-3 px-4 hover:border-app-accent/40 hover:shadow-brutal-sm transition-all duration-150 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
               :aria-label="`Open item: ${item.title}`"
               @click="modal.openExisting(item.boardId, item.id)"
             >

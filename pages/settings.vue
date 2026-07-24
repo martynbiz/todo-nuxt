@@ -50,7 +50,7 @@
             <span>Export</span>
             <span class="text-xs text-app-muted font-normal">Download all boards, items and tags as JSON</span>
           </div>
-          <button class="btn-secondary inline-flex items-center gap-[6px] bg-transparent border border-app-border rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:border-app-muted" :disabled="exporting" @click="exportData">
+          <button class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" :disabled="exporting" @click="exportData">
             <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             {{ exporting ? 'Exporting…' : 'Export JSON' }}
           </button>
@@ -64,7 +64,7 @@
             <span>Import</span>
             <span class="text-xs text-app-muted font-normal">Restore from a previously exported JSON file</span>
           </div>
-          <label class="btn-file inline-flex items-center gap-[6px] bg-transparent border border-app-border rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 relative overflow-hidden hover:border-app-muted">
+          <label class="btn-file inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 relative overflow-hidden hover:bg-app-hover">
             <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Choose file
             <input type="file" accept=".json,application/json" class="absolute inset-0 opacity-0 cursor-pointer text-[0px]" @change="onFileChange" />
@@ -73,7 +73,7 @@
 
         <div v-if="importFile" class="flex items-center gap-3 mt-4 flex-wrap">
           <span class="flex-1 text-[13px] text-app-muted overflow-hidden text-ellipsis whitespace-nowrap">{{ importFile.name }}</span>
-          <button class="btn-primary bg-app-accent text-white border-none rounded-lg py-2 px-[18px] text-[13px] font-semibold cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed" :disabled="importing" @click="importData">
+          <button class="btn-primary bg-app-text text-app-bg border border-app-border shadow-brutal-sm rounded-lg py-2 px-[18px] text-[13px] font-semibold cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" :disabled="importing" @click="importData">
             {{ importing ? 'Importing…' : 'Import' }}
           </button>
         </div>
@@ -148,6 +148,6 @@ async function importData() {
 </script>
 
 <style scoped>
-.btn-primary:hover:not(:disabled) { filter: brightness(1.1); }
+.btn-primary:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: none; }
 .theme-btn:not(.bg-app-card):hover { color: var(--text); }
 </style>

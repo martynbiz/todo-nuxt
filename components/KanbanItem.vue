@@ -1,6 +1,6 @@
 <template>
   <div
-    class="kanban-item bg-app-card border border-app-border rounded-xl py-3 px-3 cursor-pointer transition-all duration-150 relative shadow-sm hover:shadow-md hover:border-app-accent/40 hover:-translate-y-px focus:outline-2 focus:outline-black"
+    class="kanban-item bg-app-card border border-app-border rounded-xl py-3 px-3 cursor-pointer transition-all duration-150 relative shadow-brutal-sm hover:shadow-brutal hover:border-app-accent/40 hover:-translate-y-px focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
     :class="{ 'opacity-40 cursor-grabbing': isDragging }"
     role="button"
     :aria-label="item.title"

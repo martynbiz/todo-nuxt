@@ -1,7 +1,7 @@
 <template>
   <div
     class="kanban-board bg-app-board border border-app-border rounded-xl w-full flex flex-col transition-[border-color,box-shadow] duration-150 min-h-[120px] overflow-hidden"
-    :class="{ 'border-app-accent shadow-[0_0_0_2px_var(--accent-glow)]': isDragOver }"
+    :class="{ 'border-app-accent shadow-[0_0_0_2px_var(--accent)]': isDragOver }"
     role="region"
     :aria-label="board.title"
     @dragover.prevent="onDragOver"
@@ -23,7 +23,7 @@
         >{{ board.title }}</span>
         <button
           v-if="!editingTitle"
-          class="board-rename bg-transparent border-none text-app-muted cursor-pointer leading-none px-[2px] opacity-0 transition-opacity duration-100 shrink-0 focus:opacity-100 focus:outline-2 focus:outline-black rounded"
+          class="board-rename bg-transparent border-none text-app-muted cursor-pointer leading-none px-[2px] opacity-0 transition-opacity duration-100 shrink-0 focus:opacity-100 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 rounded"
           :aria-label="`Rename board ${board.title}`"
           @click.stop="startEditTitle"
         >
@@ -42,8 +42,7 @@
           @keydown.esc="editingTitle = false"
         />
         <span
-          class="shrink-0 text-[11px] font-bold px-[8px] py-[1px] rounded-full"
-          :style="{ backgroundColor: accentColor + '22', color: accentColor }"
+          class="shrink-0 text-[11px] font-bold px-[8px] py-[1px] border border-app-border text-app-text"
         >{{ visibleItems.length }}</span>
       </div>
       <button
@@ -62,8 +61,8 @@
         @dragover.prevent="onItemDragOver(index, $event)"
       >
         <div
-          class="h-[2px] rounded-full mb-[2px] transition-opacity duration-100"
-          :style="{ backgroundColor: accentColor, opacity: dropIndex === index ? 1 : 0 }"
+          class="h-[2px] bg-app-accent mb-[2px] transition-opacity duration-100"
+          :style="{ opacity: dropIndex === index ? 1 : 0 }"
         />
         <KanbanItem :item="item" :board-id="board.id" />
       </div>
@@ -72,8 +71,8 @@
         @dragover.prevent="onItemDragOver(visibleItems.length, $event)"
       >
         <div
-          class="h-[2px] rounded-full mb-[2px] transition-opacity duration-100"
-          :style="{ backgroundColor: accentColor, opacity: dropIndex === visibleItems.length ? 1 : 0 }"
+          class="h-[2px] bg-app-accent mb-[2px] transition-opacity duration-100"
+          :style="{ opacity: dropIndex === visibleItems.length ? 1 : 0 }"
         />
       </div>
     </div>
@@ -91,9 +90,6 @@ const emit = defineEmits<{
   boardDragStart: [index: number]
   boardDrop: [toIndex: number]
 }>()
-
-const COLUMN_ACCENTS = ['#f472b6', '#fb923c', '#34d399', '#60a5fa', '#a78bfa', '#f59e0b', '#ef4444']
-const accentColor = computed(() => COLUMN_ACCENTS[props.boardIndex % COLUMN_ACCENTS.length])
 
 const store = useKanbanStore()
 const visibleItems = computed(() => store.visibleItems(props.board.id))
@@ -170,6 +166,6 @@ function onBoardDragEnd() {}
 <style scoped>
 .kanban-board:hover .board-delete,
 .kanban-board:hover .board-rename { opacity: 0.5; }
-.board-delete:hover, .board-delete:focus { opacity: 1 !important; color: #ef4444; outline: 2px solid black; }
+.board-delete:hover, .board-delete:focus { opacity: 1 !important; color: #ef4444; outline: 2px solid var(--accent); outline-offset: 2px; }
 .board-rename:hover, .board-rename:focus { opacity: 1 !important; color: var(--text); }
 </style>
