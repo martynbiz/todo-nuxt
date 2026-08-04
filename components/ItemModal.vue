@@ -110,12 +110,13 @@
           </div>
         </div>
 
-        <!-- Board (new items only) -->
-        <div v-if="isNew" class="px-[18px] pt-[10px] pb-[14px] border-t border-app-border">
+        <!-- Board -->
+        <div class="px-[18px] pt-[10px] pb-[14px] border-t border-app-border">
           <label for="item-board" class="block text-[11px] font-semibold text-app-muted uppercase tracking-[0.06em] mb-2">Board</label>
           <select
             id="item-board"
             v-model="selectedBoardId"
+            @change="!isNew && onBoardChange()"
             class="bg-app-input border border-app-border rounded-lg py-[6px] px-3 text-[13px] text-app-text outline-none transition-colors focus:border-app-accent w-full"
           >
             <option value="" disabled>Select a board...</option>
@@ -310,6 +311,7 @@ watch(() => modal.state.value, async (val) => {
       title.value = item.title
       selectedTags.value = [...item.tags]
       dueDate.value = item.due_date ?? ''
+      selectedBoardId.value = val.boardId
       editor.value?.commands.setContent(item.description || '')
       // Wait for editor to normalise content before snapshotting
       await nextTick()
@@ -413,6 +415,25 @@ async function createAndAssign() {
   const tag = await store.addTag(label)
   if (!selectedTags.value.includes(tag.id)) selectedTags.value.push(tag.id)
   newTagLabel.value = ''
+}
+
+async function onBoardChange() {
+  if (isNew.value) return
+  const val = modal.state.value
+  if (!val?.itemId) return
+  const fromBoardId = val.boardId
+  const toBoardId = selectedBoardId.value
+  if (toBoardId === fromBoardId || !toBoardId) return
+  const fromBoard = store.boards.find(b => b.id === fromBoardId)
+  const fromIndex = fromBoard?.items.findIndex(i => i.id === val.itemId) ?? -1
+  if (fromIndex === -1) return
+  const toBoard = store.boards.find(b => b.id === toBoardId)
+  const toIndex = toBoard?.items.length ?? 0
+  await store.moveItem(fromBoardId, fromIndex, toBoardId, toIndex)
+  if (modal.state.value) modal.state.value.boardId = toBoardId
+  showSaved.value = true
+  if (showSavedTimer) clearTimeout(showSavedTimer)
+  showSavedTimer = setTimeout(() => { showSaved.value = false }, 2000)
 }
 
 function save() {
