@@ -134,10 +134,10 @@ const store = useKanbanStore()
 const route = useRoute()
 const router = useRouter()
 
-const activeView = computed(() => route.query.view === 'calendar' ? 'calendar' : 'kanban')
+const activeView = computed(() => route.query.view === 'kanban' ? 'kanban' : 'calendar')
 
 function setView(view: 'kanban' | 'calendar') {
-  router.replace({ query: { ...route.query, view: view === 'kanban' ? undefined : view } })
+  router.replace({ query: { ...route.query, view: view === 'calendar' ? undefined : view } })
 }
 
 const usedTags = computed(() => {
