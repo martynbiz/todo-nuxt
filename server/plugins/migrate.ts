@@ -8,6 +8,7 @@ import { up as up0006 } from '../migrations/0006_fix_comments_userid'
 import { up as up0007 } from '../migrations/0007_entra_auth'
 import { up as up0008 } from '../migrations/0008_item_due_date'
 import { up as up0009 } from '../migrations/0009_pgvector'
+import { up as up0010 } from '../migrations/0010_nextcloud_connection'
 
 const migrations = [
   { name: '0001_init',                  up: up0001 },
@@ -19,6 +20,7 @@ const migrations = [
   { name: '0007_entra_auth',           up: up0007 },
   { name: '0008_item_due_date',        up: up0008 },
   { name: '0009_pgvector',             up: up0009 },
+  { name: '0010_nextcloud_connection', up: up0010 },
 ]
 
 export default defineNitroPlugin(async () => {

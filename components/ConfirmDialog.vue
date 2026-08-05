@@ -15,6 +15,17 @@
         @keydown.esc="respond(false)"
       >
         <p id="confirm-message" class="text-sm leading-relaxed text-app-text mb-5">{{ pending.message }}</p>
+        <label
+          v-if="pending.checkbox"
+          class="flex items-center gap-2 text-sm text-app-text mb-5 cursor-pointer select-none"
+        >
+          <input
+            type="checkbox"
+            v-model="checked"
+            class="w-4 h-4 accent-[var(--accent)] focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+          />
+          {{ pending.checkbox.label }}
+        </label>
         <div class="flex justify-end gap-2">
           <button
             ref="cancelBtn"
@@ -32,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-const { pending, respond } = useConfirm()
+const { pending, respond, checked } = useConfirm()
 const { trapFocus } = useFocusTrap()
 
 const dialogEl = ref<HTMLElement | null>(null)

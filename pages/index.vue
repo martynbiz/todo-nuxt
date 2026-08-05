@@ -12,13 +12,13 @@
       <div class="flex items-center gap-3">
         <div role="group" aria-label="View" class="flex rounded-lg border border-app-border overflow-hidden">
           <button
-            class="py-[6px] px-3 text-[12px] font-semibold transition-colors duration-150 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
-            :class="activeView === 'kanban' ? 'bg-app-text text-app-bg' : 'bg-transparent text-app-muted hover:text-app-text hover:bg-app-hover'"
-            :aria-pressed="activeView === 'kanban'" @click="setView('kanban')">Kanban</button>
-          <button
             class="py-[6px] px-3 text-[12px] font-semibold transition-colors duration-150 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 border-l border-app-border"
             :class="activeView === 'calendar' ? 'bg-app-text text-app-bg' : 'bg-transparent text-app-muted hover:text-app-text hover:bg-app-hover'"
             :aria-pressed="activeView === 'calendar'" @click="setView('calendar')">Calendar</button>
+          <button
+            class="py-[6px] px-3 text-[12px] font-semibold transition-colors duration-150 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+            :class="activeView === 'kanban' ? 'bg-app-text text-app-bg' : 'bg-transparent text-app-muted hover:text-app-text hover:bg-app-hover'"
+            :aria-pressed="activeView === 'kanban'" @click="setView('kanban')">Kanban</button>
         </div>
         <UserMenu />
       </div>

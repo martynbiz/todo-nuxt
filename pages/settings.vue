@@ -82,6 +82,60 @@
         <p v-if="importResult" class="text-[13px] text-emerald-500 mt-3">{{ importResult }}</p>
       </section>
 
+      <!-- Nextcloud Backup -->
+      <section class="bg-app-card border border-app-border rounded-2xl p-7 w-full max-w-[480px]">
+        <h2 class="text-[15px] font-bold text-app-text mb-5">Nextcloud Backup</h2>
+
+        <p v-if="nextcloudLoading" class="text-[13px] text-app-muted">Loading…</p>
+
+        <div v-else-if="!nextcloud.connected" class="flex items-center justify-between gap-4">
+          <div class="flex flex-col gap-[3px] text-sm font-medium text-app-text">
+            <span>Connect</span>
+            <span class="text-xs text-app-muted font-normal">Link Nextcloud to back up and restore boards, items and tags</span>
+          </div>
+          <a
+            href="/auth/nextcloud"
+            class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text no-underline whitespace-nowrap transition-colors duration-150 hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+          >
+            Connect Nextcloud
+          </a>
+        </div>
+
+        <template v-else>
+          <div class="flex flex-col gap-[3px] text-sm font-medium text-app-text mb-5">
+            <span>{{ nextcloud.serverUrl }}</span>
+            <span class="text-xs text-app-muted font-normal">Connected since {{ formattedConnectedAt }}</span>
+          </div>
+
+          <div class="flex items-center gap-3 flex-wrap">
+            <button
+              class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+              :disabled="backingUp"
+              @click="backupNow"
+            >
+              {{ backingUp ? 'Backing up…' : 'Back up now' }}
+            </button>
+            <button
+              class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+              :disabled="restoring"
+              @click="restoreNow"
+            >
+              {{ restoring ? 'Restoring…' : 'Restore from Nextcloud' }}
+            </button>
+            <button
+              class="ml-auto bg-transparent border-none text-[13px] text-app-muted cursor-pointer underline disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+              :disabled="disconnecting"
+              @click="disconnectNextcloud"
+            >
+              {{ disconnecting ? 'Disconnecting…' : 'Disconnect' }}
+            </button>
+          </div>
+        </template>
+
+        <p v-if="nextcloudError" class="text-[13px] text-red-500 mt-3">{{ nextcloudError }}</p>
+        <p v-if="nextcloudResult" class="text-[13px] text-emerald-500 mt-3">{{ nextcloudResult }}</p>
+      </section>
+
     </main>
   </div>
 </template>
@@ -143,6 +197,106 @@ async function importData() {
     importError.value = e?.data?.message ?? 'Import failed — make sure the file is a valid export.'
   } finally {
     importing.value = false
+  }
+}
+
+// Nextcloud
+const route = useRoute()
+const router = useRouter()
+const { confirm } = useConfirm()
+
+interface NextcloudStatus { connected: boolean; serverUrl?: string; connectedAt?: string }
+
+const nextcloud = ref<NextcloudStatus>({ connected: false })
+const nextcloudLoading = ref(true)
+const backingUp = ref(false)
+const restoring = ref(false)
+const disconnecting = ref(false)
+const nextcloudError = ref('')
+const nextcloudResult = ref('')
+
+const formattedConnectedAt = computed(() =>
+  nextcloud.value.connectedAt ? new Date(nextcloud.value.connectedAt).toLocaleDateString() : ''
+)
+
+async function loadNextcloudStatus() {
+  nextcloudLoading.value = true
+  try {
+    nextcloud.value = await $fetch<NextcloudStatus>('/api/nextcloud/status')
+  } finally {
+    nextcloudLoading.value = false
+  }
+}
+
+onMounted(async () => {
+  await loadNextcloudStatus()
+
+  if (route.query.nextcloud === 'connected') {
+    nextcloudResult.value = 'Nextcloud connected.'
+  } else if (route.query.nextcloud === 'error') {
+    nextcloudError.value = 'Could not connect to Nextcloud. Please try again.'
+  }
+  if (route.query.nextcloud) {
+    const { nextcloud: _discard, ...rest } = route.query
+    router.replace({ query: rest })
+  }
+})
+
+async function backupNow() {
+  const ok = await confirm({
+    message: 'Back up all boards, items and tags to Nextcloud now? This overwrites the previous kanban-backup.json.',
+    confirmLabel: 'Back up',
+  })
+  if (!ok) return
+
+  nextcloudError.value = ''
+  nextcloudResult.value = ''
+  backingUp.value = true
+  try {
+    const result = await $fetch<{ boards: number; items: number; tags: number }>('/api/nextcloud/backup', {
+      method: 'POST',
+    })
+    nextcloudResult.value = `Backed up ${result.boards} board(s), ${result.items} item(s), ${result.tags} tag(s).`
+  } catch (e: any) {
+    nextcloudError.value = e?.data?.message ?? 'Backup failed.'
+  } finally {
+    backingUp.value = false
+  }
+}
+
+async function restoreNow() {
+  const { confirmed, checked } = await confirm({
+    message: 'Restore boards, items and tags from the latest Nextcloud backup.',
+    confirmLabel: 'Restore',
+    checkbox: { label: 'Replace existing data instead of merging', defaultChecked: true },
+  })
+  if (!confirmed) return
+
+  nextcloudError.value = ''
+  nextcloudResult.value = ''
+  restoring.value = true
+  try {
+    const result = await $fetch<{ importedBoards: number; importedItems: number; importedTags: number }>('/api/nextcloud/restore', {
+      method: 'POST',
+      body: { replace: checked },
+    })
+    nextcloudResult.value = `Restored ${result.importedBoards} board(s), ${result.importedItems} item(s), ${result.importedTags} tag(s).`
+    await kanban.init()
+  } catch (e: any) {
+    nextcloudError.value = e?.data?.message ?? 'Restore failed.'
+  } finally {
+    restoring.value = false
+  }
+}
+
+async function disconnectNextcloud() {
+  disconnecting.value = true
+  try {
+    await $fetch('/api/nextcloud/disconnect', { method: 'POST' })
+    nextcloud.value = { connected: false }
+    nextcloudResult.value = 'Nextcloud disconnected.'
+  } finally {
+    disconnecting.value = false
   }
 }
 </script>
