@@ -186,11 +186,11 @@ async function importData() {
   try {
     const text = await importFile.value.text()
     const json = JSON.parse(text)
-    const result = await $fetch<{ importedBoards: number; importedItems: number; importedTags: number }>('/api/import', {
+    const result = await $fetch<{ importedBoards: number; importedItems: number; importedTags: number; importedComments: number }>('/api/import', {
       method: 'POST',
       body: json,
     })
-    importResult.value = `Imported ${result.importedBoards} board(s), ${result.importedItems} item(s), ${result.importedTags} tag(s).`
+    importResult.value = `Imported ${result.importedBoards} board(s), ${result.importedItems} item(s), ${result.importedTags} tag(s), ${result.importedComments} comment(s).`
     importFile.value = null
     await kanban.init()
   } catch (e: any) {
@@ -253,10 +253,10 @@ async function backupNow() {
   nextcloudResult.value = ''
   backingUp.value = true
   try {
-    const result = await $fetch<{ boards: number; items: number; tags: number }>('/api/nextcloud/backup', {
+    const result = await $fetch<{ boards: number; items: number; tags: number; comments: number }>('/api/nextcloud/backup', {
       method: 'POST',
     })
-    nextcloudResult.value = `Backed up ${result.boards} board(s), ${result.items} item(s), ${result.tags} tag(s).`
+    nextcloudResult.value = `Backed up ${result.boards} board(s), ${result.items} item(s), ${result.tags} tag(s), ${result.comments} comment(s).`
   } catch (e: any) {
     nextcloudError.value = e?.data?.message ?? 'Backup failed.'
   } finally {
@@ -276,11 +276,11 @@ async function restoreNow() {
   nextcloudResult.value = ''
   restoring.value = true
   try {
-    const result = await $fetch<{ importedBoards: number; importedItems: number; importedTags: number }>('/api/nextcloud/restore', {
+    const result = await $fetch<{ importedBoards: number; importedItems: number; importedTags: number; importedComments: number }>('/api/nextcloud/restore', {
       method: 'POST',
       body: { replace: checked },
     })
-    nextcloudResult.value = `Restored ${result.importedBoards} board(s), ${result.importedItems} item(s), ${result.importedTags} tag(s).`
+    nextcloudResult.value = `Restored ${result.importedBoards} board(s), ${result.importedItems} item(s), ${result.importedTags} tag(s), ${result.importedComments} comment(s).`
     await kanban.init()
   } catch (e: any) {
     nextcloudError.value = e?.data?.message ?? 'Restore failed.'

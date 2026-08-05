@@ -25,5 +25,6 @@ export default defineEventHandler(async (event) => {
     boards: payload.boards.length,
     items: payload.boards.reduce((n, b) => n + b.items.length, 0),
     tags: payload.tags.length,
+    comments: payload.boards.reduce((n, b) => n + b.items.reduce((m, i) => m + i.comments.length, 0), 0),
   }
 })

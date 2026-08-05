@@ -37,6 +37,14 @@ const migrations = [
 
 3. The migration runs automatically on next server start (dev or production rebuild). Existing data is preserved — only the new migration is applied.
 
+## Backup / Export Completeness
+
+`server/utils/kanbanBackup.ts` (`buildExportPayload` / `applyImportPayload`) is the single source of truth for what "all your data" means across Export JSON, Import JSON, and Nextcloud backup/restore — all four code paths share it.
+
+**Whenever you add a new column to `boards`, `items`, or `tags` (or a new table hanging off an item, like `comments`), add it to both `buildExportPayload` and `applyImportPayload` in the same change.** Otherwise it's silently dropped by every export and every restore — this already happened once with `items.due_date` and `comments`.
+
+Deliberately excluded: `item_embeddings` — a lazily-regenerated semantic-search cache derived from title/description (see `server/api/chat.post.ts`), not user-authored data, so it's fine to leave out and let it regenerate.
+
 ## Accessibility (WCAG 2.1 AA)
 
 Build every component accessible from the start — do not treat it as a follow-up task.
