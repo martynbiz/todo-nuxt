@@ -1,4 +1,19 @@
 <template>
+  <!-- Back to top (appears once scrolled past a threshold; sits above Create item) -->
+  <Transition name="fab">
+    <button
+      v-if="showBackToTop && !isOpen"
+      class="fixed right-7 z-[400] w-12 h-12 rounded-full flex items-center justify-center shadow-card-hover border border-app-border bg-app-card text-app-text transition-[background,transform] duration-200 hover:bg-app-hover hover:-translate-y-0.5 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+      :class="store.boards.length > 0 ? 'bottom-[152px]' : 'bottom-[88px]'"
+      aria-label="Back to top"
+      @click="scrollToTop($event)"
+    >
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
+      </svg>
+    </button>
+  </Transition>
+
   <!-- Create item button (shown only when boards exist) -->
   <button
     v-if="store.boards.length > 0"
@@ -150,6 +165,29 @@ interface ChatMessage {
 }
 const messages = ref<ChatMessage[]>([])
 
+// ─── Back to top ─────────────────────────────────────────────────────────────
+
+const BACK_TO_TOP_THRESHOLD = 400
+const showBackToTop = ref(false)
+
+function onWindowScroll() {
+  showBackToTop.value = window.scrollY > BACK_TO_TOP_THRESHOLD
+}
+
+function scrollToTop(e: MouseEvent) {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
+  // The button hides once at the top. For keyboard activation (detail === 0), move focus to the
+  // first focusable element (skip link) so focus isn't left on a removed element
+  if (e.detail === 0) document.querySelector<HTMLElement>('a[href="#main-content"]')?.focus({ preventScroll: true })
+}
+
+onMounted(() => {
+  onWindowScroll()
+  window.addEventListener('scroll', onWindowScroll, { passive: true })
+})
+onUnmounted(() => window.removeEventListener('scroll', onWindowScroll))
+
 function trap(e: KeyboardEvent) {
   if (panelEl.value) trapFocus(e, panelEl.value)
 }
@@ -217,6 +255,8 @@ async function send() {
 </script>
 
 <style scoped>
+.fab-enter-active, .fab-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.fab-enter-from, .fab-leave-to { opacity: 0; transform: translateY(8px) scale(0.9); }
 .chat-panel-enter-active {
   transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

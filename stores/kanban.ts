@@ -92,8 +92,9 @@ export const useKanbanStore = defineStore('kanban', {
       const id = uid()
       const board = this.boards.find(b => b.id === boardId)
       if (!board) return
-      const position = board.items.length
-      board.items.push({ id, title, description, tags, due_date })
+      // New items go to the top of their board
+      const position = 0
+      board.items.unshift({ id, title, description, tags, due_date })
       await $fetch('/api/items', { method: 'POST', body: { id, boardId, title, description, tags, position, due_date } })
     },
 

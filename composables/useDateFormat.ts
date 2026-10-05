@@ -9,6 +9,12 @@ export function useDateFormat() {
     return d
   }
 
+  // Local-time YYYY-MM-DD (toISOString would shift to UTC and can land on the wrong day)
+  function todayISO(): string {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+
   function getOrdinal(n: number): string {
     const s = ['th', 'st', 'nd', 'rd']
     const v = n % 100
@@ -34,5 +40,5 @@ export function useDateFormat() {
     return parseLocalDate(iso).getTime() < getToday().getTime()
   }
 
-  return { formatDueDate, isPastDue }
+  return { formatDueDate, isPastDue, todayISO }
 }

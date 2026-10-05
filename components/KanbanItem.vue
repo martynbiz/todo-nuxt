@@ -15,15 +15,7 @@
     <!-- Title row -->
     <div class="flex items-start gap-2 mb-[8px]">
       <span class="flex-1 text-[16px] md:text-sm font-medium leading-snug break-words text-app-text">{{ item.title }}</span>
-      <button
-        class="item-delete bg-transparent border-none text-app-muted cursor-pointer p-1 -m-1 rounded-md leading-none opacity-0 transition-opacity duration-100 shrink-0"
-        :aria-label="`Delete ${item.title}`"
-        @click.stop="confirmRemoveItem"
-      >
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-          <path d="M18 6L6 18M6 6l12 12"/>
-        </svg>
-      </button>
+      <ItemActionsMenu :item="item" :board-id="boardId" class="-m-1 shrink-0" />
     </div>
 
     <!-- Tags + description indicator -->
@@ -57,16 +49,10 @@ import { useKanbanStore } from '~/stores/kanban'
 const props = defineProps<{ item: Item; boardId: string }>()
 const store = useKanbanStore()
 const modal = useItemModal()
-const { confirm } = useConfirm()
 const { formatDueDate, isPastDue } = useDateFormat()
 
 const dueDateLabel = computed(() => formatDueDate(props.item.due_date))
 const isPast = computed(() => !!props.item.due_date && isPastDue(props.item.due_date))
-
-async function confirmRemoveItem() {
-  const ok = await confirm({ message: `Delete "${props.item.title}"?` })
-  if (ok) store.removeItem(props.boardId, props.item.id)
-}
 
 const hasDescription = computed(() =>
   !!props.item.description?.replace(/<[^>]*>/g, '').trim()
@@ -97,6 +83,14 @@ function onDragEnd() {
 </script>
 
 <style scoped>
-.kanban-item:hover .item-delete { opacity: 0.6; }
-.item-delete:hover, .item-delete:focus { opacity: 1 !important; color: var(--danger); background: var(--hover-bg); }
+/* Actions trigger reveals on card hover, on its own focus, or while its menu is open */
+.kanban-item :deep(.item-actions-trigger) { opacity: 0; }
+.kanban-item:hover :deep(.item-actions-trigger) { opacity: 0.7; }
+.kanban-item :deep(.item-actions-trigger:hover),
+.kanban-item :deep(.item-actions-trigger:focus),
+.kanban-item :deep(.is-open .item-actions-trigger) { opacity: 1; }
+/* Touch devices have no hover — keep it visible */
+@media (hover: none) {
+  .kanban-item :deep(.item-actions-trigger) { opacity: 0.7; }
+}
 </style>

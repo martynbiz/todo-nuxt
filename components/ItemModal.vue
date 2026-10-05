@@ -101,6 +101,12 @@
               class="bg-app-input border border-app-border rounded-lg py-[6px] px-3 text-[13px] text-app-text outline-none transition-colors focus:border-app-accent focus:ring-2 focus:ring-app-accent/25"
             />
             <button
+              type="button"
+              class="text-[12px] font-medium text-app-accent hover:underline focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 rounded px-1"
+              aria-label="Set due date to today"
+              @click="dueDate = todayISO()"
+            >Today</button>
+            <button
               v-if="dueDate"
               class="text-[11px] text-app-muted hover:text-app-text focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 rounded px-1"
               aria-label="Clear due date"
@@ -204,6 +210,7 @@ import { useKanbanStore } from '~/stores/kanban'
 const modal = useItemModal()
 const store = useKanbanStore()
 const { trapFocus } = useFocusTrap()
+const { todayISO } = useDateFormat()
 
 const dialogEl = ref<HTMLElement | null>(null)
 

@@ -18,9 +18,9 @@
           >Overdue</span>
         </h2>
         <ul class="flex flex-col gap-2" :aria-label="`Items due ${group.heading}`">
-          <li v-for="item in group.items" :key="item.id">
+          <li v-for="item in group.items" :key="item.id" class="calendar-item relative">
             <button
-              class="w-full text-left bg-app-card border border-app-border rounded-xl py-3 px-4 shadow-card hover:border-app-accent/40 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-150 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+              class="w-full text-left bg-app-card border border-app-border rounded-xl py-3 pl-4 pr-11 shadow-card hover:border-app-accent/40 hover:shadow-card-hover transition-all duration-150 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
               :aria-label="`Open item: ${item.title}`"
               @click="modal.openExisting(item.boardId, item.id)"
             >
@@ -35,6 +35,7 @@
                 />
               </div>
             </button>
+            <ItemActionsMenu :item="item" :board-id="item.boardId" show-board class="absolute top-2 right-2" />
           </li>
         </ul>
       </li>
@@ -64,3 +65,14 @@ const groups = computed(() => {
   }))
 })
 </script>
+
+<style scoped>
+.calendar-item :deep(.item-actions-trigger) { opacity: 0; }
+.calendar-item:hover :deep(.item-actions-trigger) { opacity: 0.7; }
+.calendar-item :deep(.item-actions-trigger:hover),
+.calendar-item :deep(.item-actions-trigger:focus),
+.calendar-item :deep(.is-open .item-actions-trigger) { opacity: 1; }
+@media (hover: none) {
+  .calendar-item :deep(.item-actions-trigger) { opacity: 0.7; }
+}
+</style>
