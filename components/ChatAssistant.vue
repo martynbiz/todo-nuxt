@@ -26,8 +26,9 @@
     </svg>
   </button>
 
-  <!-- Floating trigger button -->
+  <!-- Floating trigger button (signed-in users only) -->
   <button
+    v-if="isLoggedIn"
     class="fixed bottom-6 right-6 z-[400] w-14 h-14 rounded-full flex items-center justify-center shadow-overlay transition-all duration-200 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 bg-app-accent text-app-accent-fg hover:-translate-y-0.5"
     :aria-label="isOpen ? 'Close AI assistant' : 'Open AI assistant'"
     :aria-expanded="isOpen"
@@ -47,7 +48,7 @@
   <!-- Chat panel -->
   <Transition name="chat-panel">
     <div
-      v-if="isOpen"
+      v-if="isOpen && isLoggedIn"
       id="chat-assistant-panel"
       ref="panelEl"
       role="dialog"
@@ -146,8 +147,11 @@
 
 <script setup lang="ts">
 import { useKanbanStore } from '~/stores/kanban'
+import { useAuthStore } from '~/stores/auth'
 
 const store = useKanbanStore()
+const auth = useAuthStore()
+const isLoggedIn = computed(() => !!auth.user)
 const modal = useItemModal()
 const { trapFocus } = useFocusTrap()
 
@@ -193,11 +197,20 @@ function trap(e: KeyboardEvent) {
 }
 
 function toggleOpen() {
+  if (!isLoggedIn.value) return
   isOpen.value = !isOpen.value
   if (isOpen.value) {
     nextTick(() => inputEl.value?.focus())
   }
 }
+
+// On logout: close the panel and drop the conversation so the next user doesn't see it
+watch(isLoggedIn, (val) => {
+  if (val) return
+  isOpen.value = false
+  messages.value = []
+  prompt.value = ''
+})
 
 watch(isOpen, (val) => {
   if (val) nextTick(() => inputEl.value?.focus())
@@ -217,7 +230,7 @@ function autoResize(e: Event) {
 
 async function send() {
   const text = prompt.value.trim()
-  if (!text || loading.value) return
+  if (!text || loading.value || !isLoggedIn.value) return
 
   messages.value.push({ role: 'user', content: text })
   prompt.value = ''
