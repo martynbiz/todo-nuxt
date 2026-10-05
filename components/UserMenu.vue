@@ -1,7 +1,7 @@
 <template>
   <div class="relative" ref="menuRef">
-    <button class="w-[34px] h-[34px] rounded-full border border-app-border p-0 cursor-pointer flex items-center justify-center bg-app-card transition-opacity duration-150 hover:opacity-85 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" @click="open = !open" :title="auth.user?.email">
-      <span v-if="auth.user" class="w-[34px] h-[34px] rounded-full flex items-center justify-center text-sm font-bold bg-app-text text-app-bg">
+    <button class="w-[34px] h-[34px] rounded-full border-none p-0 cursor-pointer flex items-center justify-center bg-app-card transition-opacity duration-150 hover:opacity-85 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" @click="open = !open" :title="auth.user?.email">
+      <span v-if="auth.user" class="w-[34px] h-[34px] rounded-full flex items-center justify-center text-sm font-semibold bg-app-accent text-app-accent-fg">
         {{ initial }}
       </span>
       <svg v-else class="w-[18px] h-[18px] text-app-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -11,29 +11,29 @@
     </button>
 
     <Transition name="dropdown">
-      <div v-if="open" class="absolute right-0 top-[calc(100%+8px)] bg-app-card border border-app-border rounded-xl shadow-brutal min-w-[200px] p-[6px] z-[100]">
+      <div v-if="open" class="absolute right-0 top-[calc(100%+8px)] bg-app-card border border-app-border rounded-xl shadow-overlay min-w-[220px] p-[6px] z-[100]">
         <template v-if="auth.user">
           <div class="px-3 pt-[10px] pb-2">
             <div class="text-[13px] font-semibold text-app-text whitespace-nowrap overflow-hidden text-ellipsis">{{ auth.user.name || '—' }}</div>
             <div class="text-[11px] text-app-muted mt-[2px] whitespace-nowrap overflow-hidden text-ellipsis">{{ displayEmail }}</div>
           </div>
           <div class="h-px bg-app-border my-1" />
-          <button class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left transition-colors duration-100 hover:bg-app-board" @click="go('/profile')">
+          <button class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left transition-colors duration-100 hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-[-2px]" @click="go('/profile')">
             <svg class="w-[15px] h-[15px] shrink-0 text-app-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             Profile
           </button>
-          <button class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left transition-colors duration-100 hover:bg-app-board" @click="go('/settings')">
+          <button class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left transition-colors duration-100 hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-[-2px]" @click="go('/settings')">
             <svg class="w-[15px] h-[15px] shrink-0 text-app-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Settings
           </button>
           <div class="h-px bg-app-border my-1" />
-          <button class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left transition-colors duration-100 hover:bg-app-board" @click="logout">
+          <button class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left transition-colors duration-100 hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-[-2px]" @click="logout">
             <svg class="w-[15px] h-[15px] shrink-0 text-app-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Log out
           </button>
         </template>
         <template v-else>
-          <a class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left no-underline transition-colors duration-100 hover:bg-app-board" href="/auth/microsoft">
+          <a class="dropdown-item flex items-center gap-[10px] w-full bg-transparent border-none rounded-lg py-2 px-3 text-[13px] text-app-text cursor-pointer text-left no-underline transition-colors duration-100 hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-[-2px]" href="/auth/microsoft">
             <svg class="w-[15px] h-[15px] shrink-0 text-app-muted" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
             Sign in with Microsoft
           </a>

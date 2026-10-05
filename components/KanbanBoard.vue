@@ -1,7 +1,8 @@
 <template>
   <div
-    class="kanban-board bg-app-board border border-app-border rounded-xl w-full flex flex-col transition-[border-color,box-shadow] duration-150 min-h-[120px] overflow-hidden"
-    :class="{ 'border-app-accent shadow-[0_0_0_2px_var(--accent)]': isDragOver }"
+    class="kanban-board bg-app-board rounded-2xl w-full flex flex-col transition-shadow duration-150 min-h-[120px] overflow-hidden"
+    :class="{ 'shadow-[0_0_0_2px_var(--accent)]': isDragOver }"
+    :style="{ '--tint': tintVar }"
     role="region"
     :aria-label="board.title"
     @dragover.prevent="onDragOver"
@@ -10,15 +11,16 @@
   >
     <!-- Board header -->
     <div
-      class="flex items-center justify-between px-4 pt-3 pb-2 cursor-grab"
+      class="board-header flex items-center justify-between px-4 pt-3 pb-2 cursor-grab"
       draggable="true"
       @dragstart="onBoardDragStart"
       @dragend="onBoardDragEnd"
     >
       <div class="flex items-center gap-2 flex-1 min-w-0">
+        <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: tintVar }" aria-hidden="true" />
         <span
           v-if="!editingTitle"
-          class="board-title font-bold text-[13px] text-app-text select-none truncate"
+          class="board-title font-semibold text-sm text-app-text select-none truncate"
           @dblclick="startEditTitle"
         >{{ board.title }}</span>
         <button
@@ -36,24 +38,28 @@
           v-else
           ref="titleInput"
           v-model="titleDraft"
-          class="flex-1 bg-app-input border border-app-accent rounded text-[13px] font-bold text-app-text outline-none py-[2px] px-[6px]"
+          class="flex-1 bg-app-input border border-app-accent rounded-md text-sm font-semibold text-app-text outline-none py-[2px] px-[6px] focus:ring-2 focus:ring-app-accent/30"
           @blur="saveTitle"
           @keydown.enter="saveTitle"
           @keydown.esc="editingTitle = false"
         />
         <span
-          class="shrink-0 text-[11px] font-bold px-[8px] py-[1px] border border-app-border text-app-text"
+          class="shrink-0 text-[11px] font-semibold px-[8px] py-[1px] rounded-full bg-app-hover text-app-muted"
         >{{ visibleItems.length }}</span>
       </div>
       <button
-        class="board-delete bg-transparent border-none text-app-muted text-lg cursor-pointer leading-none px-1 opacity-0 transition-opacity duration-100 shrink-0 ml-1"
+        class="board-delete bg-transparent border-none text-app-muted cursor-pointer leading-none p-1 rounded-md opacity-0 transition-opacity duration-100 shrink-0 ml-1"
         :aria-label="`Delete board ${board.title}`"
         @click="confirmRemoveBoard"
-      >×</button>
+      >
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Items list -->
-    <div class="flex flex-col flex-1 px-3 pb-1">
+    <div class="flex flex-col flex-1 px-3 pb-2">
       <div
         v-for="(item, index) in visibleItems"
         :key="item.id"
@@ -61,7 +67,7 @@
         @dragover.prevent="onItemDragOver(index, $event)"
       >
         <div
-          class="h-[2px] bg-app-accent mb-[2px] transition-opacity duration-100"
+          class="h-[2px] rounded-full bg-app-accent mb-[2px] transition-opacity duration-100"
           :style="{ opacity: dropIndex === index ? 1 : 0 }"
         />
         <KanbanItem :item="item" :board-id="board.id" />
@@ -71,7 +77,7 @@
         @dragover.prevent="onItemDragOver(visibleItems.length, $event)"
       >
         <div
-          class="h-[2px] bg-app-accent mb-[2px] transition-opacity duration-100"
+          class="h-[2px] rounded-full bg-app-accent mb-[2px] transition-opacity duration-100"
           :style="{ opacity: dropIndex === visibleItems.length ? 1 : 0 }"
         />
       </div>
@@ -92,6 +98,8 @@ const emit = defineEmits<{
 }>()
 
 const store = useKanbanStore()
+// Decorative tint cycling through the 6 palette tints by board position
+const tintVar = computed(() => `var(--col-tint-${(props.boardIndex % 6) + 1})`)
 const visibleItems = computed(() => store.visibleItems(props.board.id))
 const { confirm } = useConfirm()
 
@@ -166,6 +174,10 @@ function onBoardDragEnd() {}
 <style scoped>
 .kanban-board:hover .board-delete,
 .kanban-board:hover .board-rename { opacity: 0.5; }
-.board-delete:hover, .board-delete:focus { opacity: 1 !important; color: #ef4444; outline: 2px solid var(--accent); outline-offset: 2px; }
+.board-delete:hover, .board-delete:focus { opacity: 1 !important; color: var(--danger); background: var(--hover-bg); }
+.board-delete:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .board-rename:hover, .board-rename:focus { opacity: 1 !important; color: var(--text); }
+.board-header {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--tint) calc(var(--col-wash) * 100%), transparent), transparent);
+}
 </style>

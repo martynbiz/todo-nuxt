@@ -1,15 +1,17 @@
 <template>
   <span
-    class="tag-badge inline-flex items-center gap-[3px] py-[2px] px-2 text-[11px] font-semibold tracking-[0.02em] whitespace-nowrap leading-relaxed"
+    class="tag-badge"
     :style="{ backgroundColor: tag.color, color: contrastText(tag.color) }"
   >
     {{ tag.label }}
     <button
       v-if="removable"
-      class="bg-transparent border-none cursor-pointer text-[13px] leading-none p-0 text-[inherit] opacity-70 ml-[1px] hover:opacity-100"
+      class="bg-transparent border-none cursor-pointer leading-none p-0 -mr-1 rounded-full text-[inherit] opacity-70 hover:opacity-100 focus:opacity-100"
       :aria-label="`Remove tag ${tag.label}`"
       @click.stop="$emit('remove', tag.id)"
-    >×</button>
+    >
+      <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
   </span>
 </template>
 

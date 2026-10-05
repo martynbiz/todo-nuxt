@@ -1,6 +1,6 @@
 <template>
   <div
-    class="kanban-item bg-app-card border border-app-border rounded-xl py-3 px-3 cursor-pointer transition-all duration-150 relative shadow-brutal-sm hover:shadow-brutal hover:border-app-accent/40 hover:-translate-y-px focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+    class="kanban-item bg-app-card border border-app-border rounded-xl py-3 px-3.5 cursor-pointer transition-all duration-150 relative shadow-card hover:shadow-card-hover hover:border-app-accent/40 hover:-translate-y-0.5 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
     :class="{ 'opacity-40 cursor-grabbing': isDragging }"
     role="button"
     :aria-label="item.title"
@@ -14,12 +14,16 @@
   >
     <!-- Title row -->
     <div class="flex items-start gap-2 mb-[8px]">
-      <span class="flex-1 text-[20px] md:text-base font-medium leading-snug break-words text-app-text">{{ item.title }}</span>
+      <span class="flex-1 text-[16px] md:text-sm font-medium leading-snug break-words text-app-text">{{ item.title }}</span>
       <button
-        class="item-delete bg-transparent border-none text-app-muted text-base cursor-pointer px-[2px] leading-none opacity-0 transition-opacity duration-100 shrink-0 mt-[1px]"
+        class="item-delete bg-transparent border-none text-app-muted cursor-pointer p-1 -m-1 rounded-md leading-none opacity-0 transition-opacity duration-100 shrink-0"
         :aria-label="`Delete ${item.title}`"
         @click.stop="confirmRemoveItem"
-      >×</button>
+      >
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Tags + description indicator -->
@@ -37,11 +41,11 @@
     </div>
 
     <!-- Due date chip -->
-    <div v-if="dueDateLabel" class="flex items-center gap-1 mt-[6px]">
-      <svg class="w-[10px] h-[10px] shrink-0" :class="isPast ? 'text-red-400' : 'text-app-muted'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <div v-if="dueDateLabel" class="inline-flex items-center gap-1 mt-2 px-2 py-[2px] rounded-full" :class="isPast ? 'bg-app-danger/10' : 'bg-app-hover'">
+      <svg class="w-[10px] h-[10px] shrink-0" :class="isPast ? 'text-app-danger' : 'text-app-muted'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
       </svg>
-      <span class="text-[11px] font-medium" :class="isPast ? 'text-red-400' : 'text-app-muted'">{{ dueDateLabel }}</span>
+      <span class="text-[11px] font-medium" :class="isPast ? 'text-app-danger' : 'text-app-muted'">{{ dueDateLabel }}</span>
     </div>
   </div>
 </template>
@@ -94,5 +98,5 @@ function onDragEnd() {
 
 <style scoped>
 .kanban-item:hover .item-delete { opacity: 0.6; }
-.item-delete:hover, .item-delete:focus { opacity: 1 !important; color: #ef4444; }
+.item-delete:hover, .item-delete:focus { opacity: 1 !important; color: var(--danger); background: var(--hover-bg); }
 </style>

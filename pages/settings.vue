@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col bg-app-bg">
-    <header class="flex items-center justify-between py-4 px-6 border-b border-app-border bg-app-header sticky top-0 z-10">
-      <NuxtLink to="/" class="back-link flex items-center gap-1 text-[13px] text-app-muted no-underline transition-colors duration-150 hover:text-app-text">
+    <header class="flex items-center justify-between py-4 px-6 border-b border-app-border bg-app-header backdrop-blur-md sticky top-0 z-10">
+      <NuxtLink to="/" class="back-link flex items-center gap-1 text-[13px] text-app-muted no-underline transition-colors duration-150 hover:text-app-text rounded-md focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         Boards
       </NuxtLink>
@@ -12,25 +12,27 @@
     <main class="flex flex-col items-center gap-5 py-8 px-6">
 
       <!-- Appearance -->
-      <section class="bg-app-card border border-app-border rounded-2xl p-7 w-full max-w-[480px]">
+      <section class="bg-app-card border border-app-border rounded-2xl p-7 shadow-card w-full max-w-[480px]">
         <h2 class="text-[15px] font-bold text-app-text mb-5">Appearance</h2>
         <div class="flex items-center justify-between gap-4">
           <div class="flex flex-col gap-[3px] text-sm font-medium text-app-text">
             <span>Theme</span>
             <span class="text-xs text-app-muted font-normal">Choose your preferred colour scheme</span>
           </div>
-          <div class="flex bg-app-bg rounded-lg p-[3px] gap-[2px]">
+          <div role="group" aria-label="Theme" class="flex bg-app-board rounded-full p-1 gap-1">
             <button
-              class="theme-btn flex items-center gap-[6px] border-none rounded text-[13px] cursor-pointer transition-colors duration-150 py-[7px] px-[14px]"
-              :class="theme === 'dark' ? 'bg-app-card text-app-text font-semibold' : 'bg-transparent text-app-muted font-medium'"
+              class="theme-btn flex items-center gap-[6px] border-none rounded-full text-[13px] cursor-pointer transition-all duration-150 py-[6px] px-[14px] focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+              :class="theme === 'dark' ? 'bg-app-card text-app-text font-semibold shadow-card' : 'bg-transparent text-app-muted font-medium'"
+              :aria-pressed="theme === 'dark'"
               @click="apply('dark')"
             >
               <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
               Dark
             </button>
             <button
-              class="theme-btn flex items-center gap-[6px] border-none rounded text-[13px] cursor-pointer transition-colors duration-150 py-[7px] px-[14px]"
-              :class="theme === 'light' ? 'bg-app-card text-app-text font-semibold' : 'bg-transparent text-app-muted font-medium'"
+              class="theme-btn flex items-center gap-[6px] border-none rounded-full text-[13px] cursor-pointer transition-all duration-150 py-[6px] px-[14px] focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+              :class="theme === 'light' ? 'bg-app-card text-app-text font-semibold shadow-card' : 'bg-transparent text-app-muted font-medium'"
+              :aria-pressed="theme === 'light'"
               @click="apply('light')"
             >
               <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -41,7 +43,7 @@
       </section>
 
       <!-- Data -->
-      <section class="bg-app-card border border-app-border rounded-2xl p-7 w-full max-w-[480px]">
+      <section class="bg-app-card border border-app-border rounded-2xl p-7 shadow-card w-full max-w-[480px]">
         <h2 class="text-[15px] font-bold text-app-text mb-5">Data</h2>
 
         <!-- Export -->
@@ -50,7 +52,7 @@
             <span>Export</span>
             <span class="text-xs text-app-muted font-normal">Download all boards, items and tags as JSON</span>
           </div>
-          <button class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" :disabled="exporting" @click="exportData">
+          <button class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-card rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" :disabled="exporting" @click="exportData">
             <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             {{ exporting ? 'Exporting…' : 'Export JSON' }}
           </button>
@@ -64,7 +66,7 @@
             <span>Import</span>
             <span class="text-xs text-app-muted font-normal">Restore from a previously exported JSON file</span>
           </div>
-          <label class="btn-file inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 relative overflow-hidden hover:bg-app-hover">
+          <label class="btn-file inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-card rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 relative overflow-hidden hover:bg-app-hover">
             <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Choose file
             <input type="file" accept=".json,application/json" class="absolute inset-0 opacity-0 cursor-pointer text-[0px]" @change="onFileChange" />
@@ -73,17 +75,17 @@
 
         <div v-if="importFile" class="flex items-center gap-3 mt-4 flex-wrap">
           <span class="flex-1 text-[13px] text-app-muted overflow-hidden text-ellipsis whitespace-nowrap">{{ importFile.name }}</span>
-          <button class="btn-primary bg-app-text text-app-bg border border-app-border shadow-brutal-sm rounded-lg py-2 px-[18px] text-[13px] font-semibold cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" :disabled="importing" @click="importData">
+          <button class="btn-primary bg-app-accent text-app-accent-fg border-none shadow-card hover:opacity-90 transition-opacity rounded-lg py-2 px-[18px] text-[13px] font-semibold cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" :disabled="importing" @click="importData">
             {{ importing ? 'Importing…' : 'Import' }}
           </button>
         </div>
 
-        <p v-if="importError" class="text-[13px] text-red-500 mt-3">{{ importError }}</p>
-        <p v-if="importResult" class="text-[13px] text-emerald-500 mt-3">{{ importResult }}</p>
+        <p v-if="importError" class="text-[13px] text-app-danger mt-3">{{ importError }}</p>
+        <p v-if="importResult" class="text-[13px] text-app-text mt-3">{{ importResult }}</p>
       </section>
 
       <!-- Nextcloud Backup -->
-      <section class="bg-app-card border border-app-border rounded-2xl p-7 w-full max-w-[480px]">
+      <section class="bg-app-card border border-app-border rounded-2xl p-7 shadow-card w-full max-w-[480px]">
         <h2 class="text-[15px] font-bold text-app-text mb-5">Nextcloud Backup</h2>
 
         <p v-if="nextcloudLoading" class="text-[13px] text-app-muted">Loading…</p>
@@ -95,7 +97,7 @@
           </div>
           <a
             href="/auth/nextcloud"
-            class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text no-underline whitespace-nowrap transition-colors duration-150 hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+            class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-card rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text no-underline whitespace-nowrap transition-colors duration-150 hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
           >
             Connect Nextcloud
           </a>
@@ -109,14 +111,14 @@
 
           <div class="flex items-center gap-3 flex-wrap">
             <button
-              class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+              class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-card rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
               :disabled="backingUp"
               @click="backupNow"
             >
               {{ backingUp ? 'Backing up…' : 'Back up now' }}
             </button>
             <button
-              class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+              class="btn-secondary inline-flex items-center gap-[6px] bg-app-card border border-app-border shadow-card rounded-lg py-[7px] px-[14px] text-[13px] font-medium text-app-text cursor-pointer whitespace-nowrap transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
               :disabled="restoring"
               @click="restoreNow"
             >
@@ -132,8 +134,8 @@
           </div>
         </template>
 
-        <p v-if="nextcloudError" class="text-[13px] text-red-500 mt-3">{{ nextcloudError }}</p>
-        <p v-if="nextcloudResult" class="text-[13px] text-emerald-500 mt-3">{{ nextcloudResult }}</p>
+        <p v-if="nextcloudError" class="text-[13px] text-app-danger mt-3">{{ nextcloudError }}</p>
+        <p v-if="nextcloudResult" class="text-[13px] text-app-text mt-3">{{ nextcloudResult }}</p>
       </section>
 
     </main>
@@ -302,6 +304,5 @@ async function disconnectNextcloud() {
 </script>
 
 <style scoped>
-.btn-primary:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: none; }
 .theme-btn:not(.bg-app-card):hover { color: var(--text); }
 </style>

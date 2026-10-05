@@ -7,17 +7,22 @@
 
     <!-- Header -->
     <header
-      class="flex items-center justify-between py-[14px] px-6 border-b border-app-border bg-app-header sticky top-0 z-10">
-      <h1 class="text-[17px] font-extrabold tracking-tight text-app-text">Todo</h1>
+      class="flex items-center justify-between py-3 px-6 border-b border-app-border bg-app-header backdrop-blur-md sticky top-0 z-10">
+      <h1 class="flex items-center gap-2 text-[17px] font-bold tracking-tight text-app-text">
+        <span class="w-7 h-7 rounded-lg bg-app-accent text-app-accent-fg flex items-center justify-center" aria-hidden="true">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        </span>
+        Todo
+      </h1>
       <div class="flex items-center gap-3">
-        <div role="group" aria-label="View" class="flex rounded-lg border border-app-border overflow-hidden">
+        <div role="group" aria-label="View" class="flex gap-1 p-1 rounded-full bg-app-board">
           <button
-            class="py-[6px] px-3 text-[12px] font-semibold transition-colors duration-150 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 border-l border-app-border"
-            :class="activeView === 'calendar' ? 'bg-app-text text-app-bg' : 'bg-transparent text-app-muted hover:text-app-text hover:bg-app-hover'"
+            class="py-[5px] px-4 rounded-full text-[12px] font-semibold transition-all duration-150 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+            :class="activeView === 'calendar' ? 'bg-app-card text-app-text shadow-card' : 'bg-transparent text-app-muted hover:text-app-text'"
             :aria-pressed="activeView === 'calendar'" @click="setView('calendar')">Calendar</button>
           <button
-            class="py-[6px] px-3 text-[12px] font-semibold transition-colors duration-150 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
-            :class="activeView === 'kanban' ? 'bg-app-text text-app-bg' : 'bg-transparent text-app-muted hover:text-app-text hover:bg-app-hover'"
+            class="py-[5px] px-4 rounded-full text-[12px] font-semibold transition-all duration-150 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+            :class="activeView === 'kanban' ? 'bg-app-card text-app-text shadow-card' : 'bg-transparent text-app-muted hover:text-app-text'"
             :aria-pressed="activeView === 'kanban'" @click="setView('kanban')">Kanban</button>
         </div>
         <UserMenu />
@@ -27,12 +32,12 @@
 
     <!-- Tag filter bar -->
     <nav aria-label="Filter by tag"
-      class="flex items-center gap-3 py-[10px] px-6 border-b border-app-border bg-app-header flex-wrap"
+      class="flex items-center gap-3 py-[10px] px-6 border-b border-app-border bg-app-header backdrop-blur-md flex-wrap"
       v-if="activeView === 'kanban' && usedTags.length > 0">
       <span class="text-xs font-semibold text-app-muted whitespace-nowrap">Filter:</span>
       <div class="flex flex-wrap gap-2">
         <span v-for="tag in usedTags" :key="tag.id"
-          class="inline-flex items-center gap-[4px] py-[5px] px-[12px] border-2 border-app-border text-[12px] font-semibold tracking-[0.02em] whitespace-nowrap cursor-pointer select-none transition duration-150 tag-filter-item focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+          class="inline-flex items-center gap-[4px] py-[4px] px-[12px] rounded-full text-[12px] font-medium shadow-card tracking-[0.02em] whitespace-nowrap cursor-pointer select-none transition duration-150 tag-filter-item focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
           :class="{ 'opacity-[0.35] grayscale-[0.4]': store.filterTags.length > 0 && !store.filterTags.includes(tag.id) }"
           :style="{ backgroundColor: tag.color, color: contrastText(tag.color) }" tabindex="0" @click="store.toggleFilterTag(tag.id)"
           @keydown.enter.prevent="store.toggleFilterTag(tag.id)"
@@ -106,7 +111,7 @@
             <!-- Add board ghost card -->
             <div class="flex-shrink-0" :style="{ width: boardWidth + 'px' }">
               <button
-                class="w-full min-h-[120px] flex flex-col items-center justify-center gap-2 bg-transparent border border-dashed border-app-border rounded-xl text-app-muted text-[13px] font-medium cursor-pointer transition-[border-color,color,background] duration-150 hover:border-app-accent hover:text-app-accent hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+                class="w-full min-h-[120px] flex flex-col items-center justify-center gap-2 bg-transparent border-2 border-dashed border-app-border rounded-2xl text-app-muted text-[13px] font-medium cursor-pointer transition-[border-color,color,background] duration-150 hover:border-app-accent hover:text-app-accent hover:bg-app-accent-soft focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
                 aria-label="Create new board"
                 @click="addBoard"
               >

@@ -2,7 +2,7 @@
   <!-- Create item button (shown only when boards exist) -->
   <button
     v-if="store.boards.length > 0"
-    class="fixed bottom-[88px] right-6 z-[400] w-14 h-14 rounded-full flex items-center justify-center shadow-brutal-sm border border-app-border bg-app-card text-app-text transition-all duration-200 hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+    class="fixed bottom-[88px] right-6 z-[400] w-14 h-14 rounded-full flex items-center justify-center shadow-card-hover border border-app-border bg-app-card text-app-text transition-all duration-200 hover:bg-app-hover hover:-translate-y-0.5 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
     aria-label="Create new item"
     @click="modal.openNew()"
   >
@@ -13,10 +13,7 @@
 
   <!-- Floating trigger button -->
   <button
-    class="fixed bottom-6 right-6 z-[400] w-14 h-14 rounded-full flex items-center justify-center shadow-brutal-sm border border-app-border transition-all duration-200 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
-    :class="isOpen
-      ? 'bg-app-text text-app-bg'
-      : 'bg-app-card text-app-text hover:bg-app-hover'"
+    class="fixed bottom-6 right-6 z-[400] w-14 h-14 rounded-full flex items-center justify-center shadow-overlay transition-all duration-200 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 bg-app-accent text-app-accent-fg hover:-translate-y-0.5"
     :aria-label="isOpen ? 'Close AI assistant' : 'Open AI assistant'"
     :aria-expanded="isOpen"
     aria-controls="chat-assistant-panel"
@@ -41,22 +38,22 @@
       role="dialog"
       aria-modal="true"
       aria-label="AI Assistant"
-      class="fixed bottom-[88px] right-6 z-[400] w-[360px] bg-app-card rounded-2xl shadow-brutal-lg border border-app-border flex flex-col overflow-hidden"
+      class="fixed bottom-[88px] right-6 z-[400] w-[360px] bg-app-card rounded-2xl shadow-overlay border border-app-border flex flex-col overflow-hidden"
       style="height: 500px"
       @keydown.tab="trap"
       @keydown.esc="isOpen = false"
     >
       <!-- Header -->
-      <div class="flex items-center gap-2 px-4 py-3 bg-app-text text-app-bg border-b border-app-border shrink-0">
-        <svg class="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <div class="flex items-center gap-2 px-4 py-3 bg-app-card text-app-text border-b border-app-border shrink-0">
+        <svg class="w-4 h-4 text-app-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
         <span class="text-[14px] font-semibold flex-1">AI Assistant</span>
         <button
-          class="text-app-bg opacity-70 hover:opacity-100 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 rounded px-1"
+          class="text-app-muted hover:text-app-text hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 rounded-lg p-1"
           aria-label="Close AI assistant"
           @click="isOpen = false"
-        >×</button>
+        ><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       </div>
 
       <!-- Message list -->
@@ -76,13 +73,13 @@
         <template v-for="(msg, i) in messages" :key="i">
           <!-- User -->
           <div v-if="msg.role === 'user'" class="flex justify-end">
-            <div class="bg-app-text text-app-bg text-[13px] rounded-2xl rounded-tr-sm px-3 py-2 max-w-[80%] leading-relaxed">
+            <div class="bg-app-accent text-app-accent-fg text-[13px] rounded-2xl rounded-tr-md px-3 py-2 max-w-[80%] leading-relaxed">
               {{ msg.content }}
             </div>
           </div>
           <!-- Assistant -->
           <div v-else class="flex justify-start">
-            <div class="bg-app-card border border-app-border text-app-text text-[13px] rounded-2xl rounded-tl-sm px-3 py-2 max-w-[85%] leading-relaxed">
+            <div class="bg-app-board text-app-text text-[13px] rounded-2xl rounded-tl-md px-3 py-2 max-w-[85%] leading-relaxed">
               {{ msg.content }}
               <span v-if="msg.actionsApplied && msg.actionsApplied > 0" class="block mt-1 text-[11px] text-app-muted">
                 {{ msg.actionsApplied }} change{{ msg.actionsApplied !== 1 ? 's' : '' }} applied
@@ -93,7 +90,7 @@
 
         <!-- Loading -->
         <div v-if="loading" class="flex justify-start">
-          <div class="bg-app-card border border-app-border rounded-2xl rounded-tl-sm px-4 py-3">
+          <div class="bg-app-board rounded-2xl rounded-tl-md px-4 py-3">
             <span class="flex gap-1 items-center" aria-label="Thinking">
               <span class="w-[6px] h-[6px] rounded-full bg-app-muted animate-bounce" style="animation-delay: 0ms"/>
               <span class="w-[6px] h-[6px] rounded-full bg-app-muted animate-bounce" style="animation-delay: 150ms"/>
@@ -111,14 +108,14 @@
           placeholder="Ask me anything..."
           aria-label="Message to AI assistant"
           rows="1"
-          class="flex-1 bg-app-input border border-app-border rounded-xl py-2 px-3 text-[13px] text-app-text outline-none resize-none transition-colors focus:border-app-accent placeholder:text-app-muted leading-relaxed"
+          class="flex-1 bg-app-input border border-app-border rounded-xl py-2 px-3 text-[13px] text-app-text outline-none resize-none transition-colors focus:border-app-accent focus:ring-2 focus:ring-app-accent/25 placeholder:text-app-muted leading-relaxed"
           style="max-height: 80px; min-height: 38px"
           :disabled="loading"
           @keydown.enter.exact.prevent="send"
           @input="autoResize"
         />
         <button
-          class="btn-send shrink-0 bg-app-text text-app-bg border border-app-border shadow-brutal-sm rounded-xl px-3 py-2 text-[13px] font-semibold transition-transform disabled:opacity-40 disabled:cursor-not-allowed focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+          class="btn-send shrink-0 bg-app-accent text-app-accent-fg border-none rounded-xl px-3 py-2 text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
           :disabled="loading || !prompt.trim()"
           aria-label="Send message"
           @click="send"
@@ -220,8 +217,6 @@ async function send() {
 </script>
 
 <style scoped>
-.btn-send:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: none; }
-
 .chat-panel-enter-active {
   transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

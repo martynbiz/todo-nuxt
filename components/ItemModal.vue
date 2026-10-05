@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="backdrop">
-      <div v-if="modal.state.value" class="fixed inset-0 bg-black/[0.45] z-[200]" @click.self="close" />
+      <div v-if="modal.state.value" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-[200]" @click.self="close" />
     </Transition>
     <Transition name="sidebar">
       <div
@@ -10,31 +10,31 @@
         role="dialog"
         aria-modal="true"
         :aria-label="isNew ? 'New item' : 'Edit item'"
-        class="fixed top-0 right-0 bottom-0 w-[480px] max-w-full bg-app-card border-l border-app-border flex flex-col z-[500] shadow-brutal-lg"
+        class="fixed top-0 right-0 bottom-0 w-[480px] max-w-full bg-app-card border-l border-app-border flex flex-col z-[500] shadow-overlay sm:top-2 sm:bottom-2 sm:right-2 sm:rounded-2xl sm:border overflow-hidden"
         @keydown.tab="trap"
       >
 
         <!-- Header -->
-        <div class="flex items-center gap-2 px-[18px] pt-[18px] pb-3 border-b border-app-border">
+        <div class="flex items-center gap-2 px-[18px] pt-[18px] pb-3 border-app-border">
           <input
             ref="titleInput"
             v-model="title"
             aria-label="Item title"
-            class="flex-1 bg-transparent border-none text-[17px] font-bold text-app-text outline-none placeholder:text-app-muted placeholder:font-normal"
+            class="flex-1 bg-transparent border-none text-lg font-semibold text-app-text outline-none placeholder:text-app-muted placeholder:font-normal"
             placeholder="Item title..."
             @keydown.esc="close"
             @keydown.enter="save"
           />
-          <button aria-label="Close" class="modal-close bg-transparent border-none text-app-muted text-[22px] cursor-pointer leading-none px-1 hover:text-app-text" @click="close">×</button>
+          <button aria-label="Close" class="modal-close bg-transparent border-none text-app-muted cursor-pointer p-1.5 rounded-lg hover:text-app-text hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" @click="close"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
         </div>
 
         <!-- WYSIWYG toolbar -->
-        <div class="flex gap-[2px] px-3 py-[6px] border-b border-app-border flex-wrap" v-if="editor">
+        <div class="flex gap-[2px] mx-[14px] p-1 rounded-xl bg-app-board flex-wrap" v-if="editor">
           <button
             v-for="btn in toolbarButtons"
             :key="btn.label"
-            class="toolbar-btn bg-transparent border border-transparent rounded text-app-muted text-xs font-bold cursor-pointer py-[3px] px-2 min-w-[28px] text-center transition-[background,color] duration-100 hover:bg-app-hover hover:text-app-text"
-            :class="{ 'bg-app-hover text-app-accent border-app-border': btn.active() }"
+            class="toolbar-btn border-none rounded-lg text-xs font-bold cursor-pointer py-1 px-2 min-w-[30px] text-center transition-[background,color] duration-100 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-1"
+            :class="btn.active() ? 'bg-app-card text-app-accent shadow-card' : 'bg-transparent text-app-muted hover:bg-app-card hover:text-app-text'"
             @click="btn.action()"
             :aria-label="btn.label"
             :aria-pressed="btn.active()"
@@ -63,24 +63,24 @@
             <div class="relative" ref="tagPickerRef">
               <button ref="addTagBtn" class="btn-add-tag bg-transparent border border-dashed border-app-border rounded-full text-[11px] text-app-muted py-[2px] px-2 cursor-pointer transition-[border-color,color] duration-100 hover:border-app-accent hover:text-app-accent" @click="showTagPicker = !showTagPicker">+ tag</button>
               <div v-if="showTagPicker" class="absolute top-[calc(100%+4px)] left-0 z-[300] w-[200px]" @focusout="onTagPickerFocusOut" @keydown.esc.stop="closeTagPicker">
-                <div class="bg-app-card border border-app-border rounded-lg p-[6px] shadow-brutal-sm flex flex-col gap-[3px]">
+                <div class="bg-app-card border border-app-border rounded-xl p-[6px] shadow-overlay flex flex-col gap-[3px]">
                   <button
                     v-for="tag in usedTags"
                     :key="tag.id"
                     type="button"
-                    class="flex items-center justify-between px-[6px] py-1 rounded cursor-pointer bg-transparent border-none w-full text-left hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+                    class="flex items-center justify-between px-[6px] py-1 rounded-lg cursor-pointer bg-transparent border-none w-full text-left hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
                     :class="{ 'bg-app-hover': selectedTags.includes(tag.id) }"
                     @click="toggleTag(tag.id)"
                   >
                     <TagBadge :tag="tag" />
                     <span v-if="selectedTags.includes(tag.id)" class="text-app-accent font-bold text-[11px]">✓</span>
                   </button>
-                  <button v-if="newTagLabel.trim()" type="button" class="btn-create-tag bg-app-text text-app-bg border border-app-border rounded text-[11px] cursor-pointer py-1 px-2 w-full text-left focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" @click="createAndAssign">Create "{{ newTagLabel }}"</button>
+                  <button v-if="newTagLabel.trim()" type="button" class="btn-create-tag bg-app-accent text-app-accent-fg border-none rounded-lg text-[11px] font-medium hover:opacity-90 cursor-pointer py-1 px-2 w-full text-left focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" @click="createAndAssign">Create "{{ newTagLabel }}"</button>
                   <input
                     ref="tagInput"
                     v-model="newTagLabel"
                     placeholder="New tag..."
-                    class="w-full bg-app-input border border-app-border rounded text-xs text-app-text py-[5px] px-2 mt-1 outline-none focus:border-app-accent box-border"
+                    class="w-full bg-app-input border border-app-border rounded-lg text-xs text-app-text py-[5px] px-2 mt-1 outline-none focus:border-app-accent focus:ring-2 focus:ring-app-accent/25 box-border"
                     @keydown.enter="createAndAssign"
                     @click.stop
                   />
@@ -98,7 +98,7 @@
               id="item-due-date"
               type="date"
               v-model="dueDate"
-              class="bg-app-input border border-app-border rounded-lg py-[6px] px-3 text-[13px] text-app-text outline-none transition-colors focus:border-app-accent"
+              class="bg-app-input border border-app-border rounded-lg py-[6px] px-3 text-[13px] text-app-text outline-none transition-colors focus:border-app-accent focus:ring-2 focus:ring-app-accent/25"
             />
             <button
               v-if="dueDate"
@@ -117,7 +117,7 @@
             id="item-board"
             v-model="selectedBoardId"
             @change="!isNew && onBoardChange()"
-            class="bg-app-input border border-app-border rounded-lg py-[6px] px-3 text-[13px] text-app-text outline-none transition-colors focus:border-app-accent w-full"
+            class="bg-app-input border border-app-border rounded-lg py-[6px] px-3 text-[13px] text-app-text outline-none transition-colors focus:border-app-accent focus:ring-2 focus:ring-app-accent/25 w-full"
           >
             <option value="" disabled>Select a board...</option>
             <option v-for="board in store.boards" :key="board.id" :value="board.id">{{ board.title }}</option>
@@ -132,7 +132,7 @@
           <div class="flex flex-col gap-3" v-if="comments.length > 0">
             <div v-for="comment in comments" :key="comment.id" class="flex gap-[10px] group">
               <div
-                class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold bg-app-text text-app-bg border border-app-border shrink-0 mt-[1px]"
+                class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold bg-app-accent-soft text-app-accent shrink-0 mt-[1px]"
               >{{ comment.author.name?.[0]?.toUpperCase() ?? '?' }}</div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-baseline gap-2 flex-wrap">
@@ -140,7 +140,7 @@
                   <span class="text-[11px] text-app-muted">{{ formatTime(comment.createdAt) }}</span>
                   <button
                     v-if="comment.isOwn"
-                    class="text-[11px] text-app-muted opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 focus:opacity-100 focus:text-red-500 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 ml-auto"
+                    class="text-[11px] text-app-muted opacity-0 group-hover:opacity-100 transition-opacity hover:text-app-danger focus:opacity-100 focus:text-app-danger focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2 ml-auto"
                     @click="deleteComment(comment.id)"
                   >Delete</button>
                 </div>
@@ -157,11 +157,11 @@
               placeholder="Add a comment..."
               aria-label="Add a comment"
               rows="2"
-              class="flex-1 bg-app-input border border-app-border rounded-lg py-[8px] px-3 text-[13px] text-app-text outline-none resize-none transition-colors duration-150 focus:border-app-accent placeholder:text-app-muted"
+              class="flex-1 bg-app-input border border-app-border rounded-lg py-[8px] px-3 text-[13px] text-app-text outline-none resize-none transition-colors duration-150 focus:border-app-accent focus:ring-2 focus:ring-app-accent/25 placeholder:text-app-muted"
               @keydown.enter.exact.prevent="submitComment"
             />
             <button
-              class="btn-comment bg-app-text text-app-bg border border-app-border rounded-lg py-[8px] px-3 text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+              class="btn-comment bg-app-accent text-app-accent-fg border-none rounded-lg hover:opacity-90 transition-opacity py-[8px] px-3 text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
               :disabled="!newComment.trim()"
               @click="submitComment"
             >Post</button>
@@ -174,7 +174,7 @@
         <div class="flex items-center gap-2 px-[18px] py-3 border-t border-app-border">
           <span
             v-if="showSaved && !isNew"
-            class="text-[12px] text-green-500 mr-auto flex items-center gap-1"
+            class="text-[12px] text-app-muted mr-auto flex items-center gap-1"
             aria-live="polite"
           >
             <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
@@ -183,7 +183,7 @@
           <span v-else class="mr-auto" />
           <button v-if="isNew" class="btn-cancel bg-app-card border border-app-border rounded-lg py-[7px] px-[14px] text-[13px] cursor-pointer text-app-text hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2" @click="close">Cancel</button>
           <button
-            class="btn-save bg-app-text text-app-bg border border-app-border shadow-brutal-sm rounded-lg py-[7px] px-[18px] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+            class="btn-save bg-app-accent text-app-accent-fg border-none shadow-card rounded-lg hover:opacity-90 transition-opacity py-[7px] px-[18px] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
             @click="save"
             :disabled="!title.trim() || (isNew && !selectedBoardId)"
           >
@@ -459,10 +459,6 @@ function close() {
 </script>
 
 <style scoped>
-.btn-save:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: none; }
-.btn-create-tag:hover { filter: invert(1); }
-.btn-comment:hover:not(:disabled) { filter: invert(1); }
-
 .sidebar-enter-active,
 .sidebar-leave-active {
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -498,16 +494,17 @@ function close() {
 .prose-editor s { opacity: 0.5; }
 .prose-editor code {
   background: var(--hover-bg);
-  border-radius: 4px;
-  padding: 1px 5px;
+  border-radius: 6px;
+  padding: 1px 6px;
   font-size: 12px;
-  font-family: monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 .prose-editor blockquote {
   border-left: 3px solid var(--accent);
-  padding-left: 12px;
+  background: var(--accent-soft);
+  border-radius: 0 8px 8px 0;
+  padding: 6px 12px;
   margin: 6px 0;
-  opacity: 0.75;
 }
 .prose-editor ul, .prose-editor ol {
   padding-left: 20px;
