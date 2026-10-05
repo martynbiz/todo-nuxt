@@ -7,13 +7,50 @@
 
     <!-- Header -->
     <header
-      class="flex items-center justify-between py-3 px-6 border-b border-app-border bg-app-header backdrop-blur-md sticky top-0 z-10">
+      class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-4 gap-y-3 py-3 px-6 border-b border-app-border bg-app-header backdrop-blur-md sticky top-0 z-10">
       <h1 class="flex items-center gap-2 text-[17px] font-bold tracking-tight text-app-text">
         <span class="w-7 h-7 rounded-lg bg-app-accent text-app-accent-fg flex items-center justify-center" aria-hidden="true">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
         </span>
         Todo
       </h1>
+
+      <!-- Search (full-width second row on mobile) -->
+      <div role="search" class="order-last sm:order-none w-full sm:w-auto sm:flex-1 sm:max-w-sm">
+        <label for="card-search" class="sr-only">Search cards by title</label>
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-app-muted pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+          </svg>
+          <input
+            id="card-search"
+            ref="searchInput"
+            v-model="store.searchQuery"
+            type="search"
+            autocomplete="off"
+            placeholder="Search cards…"
+            aria-keyshortcuts="/"
+            class="card-search w-full bg-app-board border border-transparent rounded-full py-[7px] pl-9 pr-9 text-[13px] text-app-text placeholder:text-app-muted outline-none transition-colors focus:bg-app-input focus:border-app-accent focus:ring-2 focus:ring-app-accent/25"
+            @keydown.esc.prevent="onSearchEscape"
+          />
+          <button
+            v-if="store.searchQuery"
+            type="button"
+            class="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full text-app-muted hover:text-app-text hover:bg-app-hover focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-1"
+            aria-label="Clear search"
+            @click="clearSearch"
+          >
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <kbd
+            v-else
+            class="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 items-center justify-center min-w-[20px] h-5 px-1 rounded border border-app-border text-[11px] font-sans text-app-muted pointer-events-none"
+            aria-hidden="true"
+          >/</kbd>
+        </div>
+        <p class="sr-only" aria-live="polite">{{ searchStatus }}</p>
+      </div>
+
       <div class="flex items-center gap-3">
         <div role="group" aria-label="View" class="flex gap-1 p-1 rounded-full bg-app-board">
           <button
@@ -145,6 +182,41 @@ function setView(view: 'kanban' | 'calendar') {
   router.replace({ query: { ...route.query, view: view === 'calendar' ? undefined : view } })
 }
 
+// Search
+const searchInput = ref<HTMLInputElement | null>(null)
+
+function clearSearch() {
+  store.searchQuery = ''
+  searchInput.value?.focus()
+}
+
+// Esc clears the query; a second Esc on an empty box leaves the field
+function onSearchEscape() {
+  if (store.searchQuery) store.searchQuery = ''
+  else searchInput.value?.blur()
+}
+
+const matchCount = computed(() => activeView.value === 'kanban'
+  ? store.boards.reduce((n, b) => n + store.visibleItems(b.id).length, 0)
+  : store.itemsWithDueDate.filter(i => store.matchesSearch(i)).length)
+
+const searchStatus = computed(() => {
+  if (!store.searchQuery.trim()) return ''
+  const n = matchCount.value
+  return n === 0 ? 'No matching cards' : `${n} matching card${n === 1 ? '' : 's'}`
+})
+
+// "/" focuses search unless the user is typing somewhere or an overlay is open
+function onGlobalKeydown(e: KeyboardEvent) {
+  if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return
+  const t = e.target as HTMLElement
+  if (t.closest('input, textarea, select, [contenteditable="true"], [role="dialog"], [role="alertdialog"]')) return
+  e.preventDefault()
+  searchInput.value?.focus()
+}
+onMounted(() => window.addEventListener('keydown', onGlobalKeydown))
+onUnmounted(() => window.removeEventListener('keydown', onGlobalKeydown))
+
 const usedTags = computed(() => {
   const usedIds = new Set(store.boards.flatMap(b => b.items.flatMap(i => i.tags)))
   return store.tags.filter(t => usedIds.has(t.id))
@@ -261,6 +333,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Use our own clear button instead of the browser's native one */
+.card-search::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
 .tag-filter-item:hover {
   filter: brightness(1.15);
 }

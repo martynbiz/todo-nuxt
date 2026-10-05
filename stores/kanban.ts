@@ -29,19 +29,30 @@ function uid() {
   return Math.random().toString(36).slice(2, 10)
 }
 
+function titleMatches(title: string, query: string) {
+  const q = query.trim().toLowerCase()
+  return !q || title.toLowerCase().includes(q)
+}
+
 export const useKanbanStore = defineStore('kanban', {
   state: () => ({
     boards: [] as Board[],
     tags: [] as Tag[],
     filterTags: [] as string[],
+    searchQuery: '',
   }),
 
   getters: {
+    // Case-insensitive title match against the header search box (empty query matches everything)
+    matchesSearch: (state) => (item: Item) => titleMatches(item.title, state.searchQuery),
     visibleItems: (state) => (boardId: string) => {
       const board = state.boards.find(b => b.id === boardId)
       if (!board) return []
-      if (state.filterTags.length === 0) return board.items
-      return board.items.filter(item => item.tags.some(t => state.filterTags.includes(t)))
+      if (state.filterTags.length === 0 && !state.searchQuery.trim()) return board.items
+      return board.items.filter(item =>
+        (state.filterTags.length === 0 || item.tags.some(t => state.filterTags.includes(t)))
+        && titleMatches(item.title, state.searchQuery),
+      )
     },
     itemsWithDueDate: (state) => {
       return state.boards

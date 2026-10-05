@@ -1,6 +1,10 @@
 <template>
   <main id="main-content" class="p-6 max-w-2xl mx-auto w-full">
-    <div v-if="groups.length === 0" class="flex flex-col items-center justify-center gap-3 text-app-muted p-16">
+    <div v-if="groups.length === 0 && store.searchQuery.trim()" class="flex flex-col items-center justify-center gap-2 text-app-muted p-16">
+      <p class="text-[15px] font-semibold text-app-text">No matching cards</p>
+      <p class="text-[13px]">Nothing with a due date matches “{{ store.searchQuery.trim() }}”</p>
+    </div>
+    <div v-else-if="groups.length === 0" class="flex flex-col items-center justify-center gap-3 text-app-muted p-16">
       <svg class="w-10 h-10 opacity-30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
       </svg>
@@ -52,7 +56,7 @@ const { formatDueDate, isPastDue } = useDateFormat()
 
 const groups = computed(() => {
   const byDate = new Map<string, typeof store.itemsWithDueDate>()
-  for (const item of store.itemsWithDueDate) {
+  for (const item of store.itemsWithDueDate.filter(i => store.matchesSearch(i))) {
     const key = item.due_date!
     if (!byDate.has(key)) byDate.set(key, [])
     byDate.get(key)!.push(item)

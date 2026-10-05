@@ -156,10 +156,20 @@ function onDrop(e: DragEvent) {
     const data = JSON.parse(raw)
     if (data.boardDrag !== undefined) return // board reorder handled in parent
     const { boardId: fromBoardId, index: fromIndex } = data
-    const toIndex = dropIndex.value ?? visibleItems.value.length
+    const toIndex = toFullIndex(dropIndex.value ?? visibleItems.value.length)
     store.moveItem(fromBoardId, fromIndex, props.board.id, toIndex)
   } catch {}
   dropIndex.value = null
+}
+
+// dropIndex is relative to visibleItems; when a tag filter or search hides cards,
+// translate it to a position in the full board.items list
+function toFullIndex(visibleIndex: number) {
+  const all = props.board.items
+  const visible = visibleItems.value
+  if (visible.length === all.length) return visibleIndex
+  if (visibleIndex < visible.length) return all.indexOf(visible[visibleIndex])
+  return visible.length ? all.indexOf(visible[visible.length - 1]) + 1 : all.length
 }
 
 // Board drag
