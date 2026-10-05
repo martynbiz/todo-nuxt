@@ -3,12 +3,12 @@
   <Transition name="fab">
     <button
       v-if="showBackToTop && !isOpen"
-      class="fixed right-7 z-[400] w-12 h-12 rounded-full flex items-center justify-center shadow-card-hover border border-app-border bg-app-card text-app-text transition-[background,transform] duration-200 hover:bg-app-hover hover:-translate-y-0.5 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
+      class="fixed right-6 z-[400] w-14 h-14 rounded-full flex items-center justify-center shadow-card-hover border border-app-border bg-app-card text-app-text transition-[background,transform] duration-200 hover:bg-app-hover hover:-translate-y-0.5 focus:outline-2 focus:outline-[var(--accent)] focus:outline-offset-2"
       :class="store.boards.length > 0 ? 'bottom-[152px]' : 'bottom-[88px]'"
       aria-label="Back to top"
       @click="scrollToTop($event)"
     >
-      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
         <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
       </svg>
     </button>
